@@ -1,0 +1,5 @@
+Make gyrometer have a save file that can be used for saving calibrations
+Make a self test for the gyrometer
+Make a calibration process for the gyrometer
+Increase code speed for I2C interactions?
+Make a program to measure distance with the ultrasonic ranger
