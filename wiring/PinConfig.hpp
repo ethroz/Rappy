@@ -12,7 +12,8 @@ enum class PinMode : uint8_t {
 
 struct PwmConfig {    
     // Default sample rate is 5 us.
-    // The frequency will be snapped to the closest acceptable value for the given sample rate.
+    // The frequency will be snapped to the closest of the following:
+    // 8000, 4000, 2000, 1600, 1000, 800, 500, 400, 320, 250, 200, 160, 100, 80, 50, 40, 20, 10
     int range = 255;
     int freq = 1000;
 };

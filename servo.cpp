@@ -1,6 +1,7 @@
 #include <chrono>
 #include <string>
 #include <thread>
+#include <vector>
 #include <fmt/core.h>
 
 #include "servo/Controller.hpp"
@@ -14,8 +15,8 @@ using namespace std::literals;
 class Prgm : public program::Base {
 public:
     Prgm(std::string_view nm) : program::Base(nm) {
-        parser.addPositional(name, "name", "FS90R");
-        parser.addPositional(pin, "pin", "The pin that is connected to the servo.");
+        parser.addPositional(name, "name", "FS90R or L298N");
+        parser.addPositional(pins, "pins", "The pin(s) that is/are connected to the servo.");
         parser.addPositional(mode, "mode", "constant, oscillate, and dance");
         parser.addOptional(max, "max", "The absolute maximum power to the motor.");
         parser.addOptional(period, "period", "The period of one oscillation.");
@@ -28,7 +29,7 @@ public:
     void init() override {
         auto sName = servo::Motor::nameFromString(name);
         auto cMode = servo::Controller::modeFromString(mode);
-        auto servo = servo::Motor::create(sName, pin);
+        auto servo = servo::Motor::create(sName, pins);
         controller = servo::Controller::create(cMode, std::move(servo), max, period);
     }
     
@@ -38,7 +39,7 @@ public:
     }
 
 private:
-    int pin;
+    std::vector<int> pins;
     std::string name;
     std::string mode;
     float max = 1.0f;

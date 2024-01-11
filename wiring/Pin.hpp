@@ -44,7 +44,7 @@ protected:
 class PwmPin : public OutputPin {
 public:
     PwmPin(const PinConfig& config);
-    ~PwmPin() override { set(0.0f); }
+    virtual ~PwmPin() override { set(0.0f); }
 
     void set(float val) override;
 };
@@ -52,7 +52,7 @@ public:
 class ServoPin : public OutputPin {
 public:
     ServoPin(const PinConfig& config);
-    ~ServoPin() override { set(0.0f); }
+    virtual ~ServoPin() override { set(0.0f); }
     
     //  1.0 -> 2500 us
     //  0.0 -> 1500 us
