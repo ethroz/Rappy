@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "Other.hpp"
+
 class Log {
 public:
     explicit Log(std::ostream& stream = std::cout, bool flush = true) : m_out(stream), m_flush(flush) {}
@@ -26,7 +28,4 @@ public:
 private:
     std::ostream& m_out;
 };
-
-template <>
-inline const Log& Log::operator<<(const bool& val) const { m_out << (val ? "true" : "false"); return *this; }
 

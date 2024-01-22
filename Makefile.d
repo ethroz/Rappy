@@ -1,7 +1,7 @@
 include Makefile.common
 
 # Define the libraries to link with.
-LIB := -lpthread -lpigpio -lrt -L./lib/shr -lfmt
+LIB := -lpthread -lpigpio -lrt -lbluetooth -L./lib/shr -lfmt
 
 # Define the includes.
 INCDIR := .

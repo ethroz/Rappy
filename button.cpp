@@ -7,9 +7,12 @@
 
 #include "program/Base.hpp"
 
-class Prgm : public program::Base {
+using namespace program;
+using namespace wiring;
+
+class Prgm : public Base {
 public:
-    Prgm(std::string_view nm) : program::Base(nm) {
+    Prgm(std::string_view nm) : Base(nm) {
         parser.addPositional(pin, "pin", "The pin that is connected to the button");
         parser.addOptional(toggle, "toggle", "Each press toggles the trigger, otherwise the button must be held.");
         parser.addOptional(freq, "freq", "The frequency to poll the input.");
@@ -19,8 +22,8 @@ public:
     }
 
     void init() override {
-        wiring::PinConfig config{pin, wiring::PinMode::IN, true};
-        input = wiring::Pin::create(config);
+        PinConfig config{pin, PinMode::IN, true};
+        input = Pin::create(config);
         const auto fSec = std::chrono::duration<float>(1.0f / freq);
         sleepTime = std::chrono::round<std::chrono::nanoseconds>(fSec);        
         
@@ -50,7 +53,7 @@ private:
     int pin;
     bool toggle = false;
     float freq = 100.0f;
-    std::unique_ptr<wiring::Pin> input;
+    std::unique_ptr<Pin> input;
     std::chrono::nanoseconds sleepTime;
     bool on = false;
     bool last = false;

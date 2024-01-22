@@ -9,11 +9,13 @@
 
 #include "program/Base.hpp"
 
+using namespace program;
+using namespace light;
 using namespace std::literals; 
 
-class Prgm : public program::Base {
+class Prgm : public Base {
 public:
-    Prgm(std::string_view nm) : program::Base(nm) {
+    Prgm(std::string_view nm) : Base(nm) {
         parser.addPositional(name, "name", "\"RGB LED\" or \"Dual-Color LED\".");
         parser.addPositional(pins, "pins", "The output pins connected to the light.");
         parser.addPositional(mode, "mode", "cycle, solid, or flash.");
@@ -27,10 +29,10 @@ public:
     }
 
     void init() override {
-        auto lName = light::Light::nameFromString(name);
-        auto cMode = light::Controller::modeFromString(mode);
-        auto light = light::Light::create(lName, light::LightMode::PWM, pins);
-        controller = light::Controller::create(cMode, std::move(light), color, brightness, period, out);
+        auto lName = Light::nameFromString(name);
+        auto cMode = Controller::modeFromString(mode);
+        auto light = Light::create(lName, LightMode::PWM, pins);
+        controller = Controller::create(cMode, std::move(light), color, brightness, period, out);
     }
     
     void loop() override {
@@ -44,8 +46,8 @@ private:
     std::vector<int> pins;
     float brightness = 1.0f;
     Duration period = 1.0f;
-    light::Color color = light::Color::WHITE();
-    std::unique_ptr<light::Controller> controller;
+    Color color = Color::WHITE();
+    std::unique_ptr<Controller> controller;
 };
 
 int main(int argc, char* argv[]) {

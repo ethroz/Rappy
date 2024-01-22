@@ -10,11 +10,13 @@
 
 #include "program/Base.hpp"
 
+using namespace program;
+using namespace servo;
 using namespace std::literals;
 
-class Prgm : public program::Base {
+class Prgm : public Base {
 public:
-    Prgm(std::string_view nm) : program::Base(nm) {
+    Prgm(std::string_view nm) : Base(nm) {
         parser.addPositional(name, "name", "FS90R or L298N");
         parser.addPositional(pins, "pins", "The pin(s) that is/are connected to the servo.");
         parser.addPositional(mode, "mode", "constant, oscillate, and dance");
@@ -27,10 +29,10 @@ public:
     }
 
     void init() override {
-        auto sName = servo::Motor::nameFromString(name);
-        auto cMode = servo::Controller::modeFromString(mode);
-        auto servo = servo::Motor::create(sName, pins);
-        controller = servo::Controller::create(cMode, std::move(servo), max, period);
+        auto sName = Motor::nameFromString(name);
+        auto cMode = Controller::modeFromString(mode);
+        auto servo = Motor::create(sName, pins);
+        controller = Controller::create(cMode, std::move(servo), max, period);
     }
     
     void loop() override {
@@ -44,7 +46,7 @@ private:
     std::string mode;
     float max = 1.0f;
     Duration period = 1.0f;
-    std::unique_ptr<servo::Controller> controller;
+    std::unique_ptr<Controller> controller;
 };
 
 int main(int argc, char* argv[]) {

@@ -20,4 +20,5 @@ all:
 # Clean rule.
 clean:
 	rm -rf $(OBJDIR)/* $(DEPDIR)/* $(DEPDIR)/.stamp* $(BINDIR)/*
+	$(MAKE)
 

@@ -1,7 +1,9 @@
 #include <chrono>
+#include <string>
 #include <string_view>
 #include <thread>
 #include <vector>
+#include <dirent.h>
 
 #include "servo/Controller.hpp"
 #include "servo/Motor.hpp"
@@ -25,15 +27,39 @@ int main(int argc, char* argv[]) {
     //    }
     //}
     
-    std::vector<std::string_view> v;
-    v.reserve(argc);
-    for (int i = 0; i < argc; i++) {
-        v.push_back(argv[i]);
+    //std::vector<std::string_view> v;
+    //v.reserve(argc);
+    //for (int i = 0; i < argc; i++) {
+    //    v.push_back(argv[i]);
+    //}
+
+    //auto it = v.begin();
+    //out << "Size of vector iterator: " << sizeof(it) << " bytes\n";
+
+    // Get the directory path.
+    const std::string dir = "/sys/class/leds/";
+
+    // Open the directory
+    DIR* dp = opendir(dir.c_str());
+    if (dp == NULL) {
+        err << "Invalid directory: " << dir;
+        return 2;
     }
 
-    auto it = v.begin();
-    out << "Size of vector iterator: " << sizeof(it) << " bytes\n";
+    // Iterate over the directory entries
+    struct dirent* entry;
+    while ((entry = readdir(dp)) != NULL) {
+        std::string type;
+        switch (entry->d_type) {
+        case DT_REG: type = "file"; break;
+        case DT_DIR: type = "dir"; break;
+        default:     type = "other"; break;
+        }
+        out << entry->d_name << " - " << type;
+    }
 
-    return 0;
-}
+    // Close the directory
+    closedir(dp);
+
+    return 0;}
 

@@ -152,19 +152,23 @@ template <>
 Argument::Argument(std::vector<int>& ref, std::string_view tag, std::string_view explanation, bool required, int position) :
     Argument::Argument(tag, explanation, required, position, "...",
         [&ref](ArgPtr& argPtr, const ArgPtr end) {
-            int i = 0;
-            for (; argPtr != end; argPtr++, i++) {
-                int num;
-                auto result = std::from_chars(argPtr->data(), argPtr->data() + argPtr->size(), num);
-                if (result.ec != std::errc()) {
-                    break;
-                }
-                ref.push_back(num);
-            }
-
-            return i > 0;
+            return intListFromArgs(argPtr, end, ref);
         })
 {}
+
+bool intListFromArgs(ArgPtr& argPtr, const ArgPtr end, std::vector<int>& list) {
+    int i = 0;
+    for (; argPtr != end; argPtr++, i++) {
+        int num;
+        auto result = std::from_chars(argPtr->data(), argPtr->data() + argPtr->size(), num);
+        if (result.ec != std::errc()) {
+            break;
+        }
+        list.push_back(num);
+    }
+
+    return i > 0;
+}
 
 } // namespace program
 

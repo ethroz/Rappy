@@ -48,5 +48,7 @@ private:
     const bool m_required;
 };
 
+bool intListFromArgs(ArgPtr& argPtr, const ArgPtr end, std::vector<int>& list);
+
 } // namespace program
 

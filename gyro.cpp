@@ -1,7 +1,6 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
-#include <iomanip>
 #include <map>
 #include <memory>
 #include <thread>
@@ -14,9 +13,9 @@
 
 #include "program/Base.hpp"
 
-using namespace std::literals;
 using namespace program;
 using namespace gyro;
+using namespace std::literals;
 
 enum class GyroMode : uint8_t {
     ACCEL,
@@ -96,11 +95,15 @@ public:
             const auto accelLen = std::sqrt(accelX * accelX + accelY * accelY + accelZ * accelZ);
 
             terminal::clear(false);
-            out << std::fixed << std::setprecision(1) <<
-                "accelX: " << accelX << "\n"
-                "accelY: " << accelY << "\n"
-                "accelZ: " << accelZ << "\n"
-                "accel:  " << accelLen;
+            out << fmt::format( 
+                "accelX: {:.1f}\n"
+                "accelY: {:.1f}\n"
+                "accelZ: {:.1f}\n"
+                "accel:  {:.1f}",
+                accelX,
+                accelY,
+                accelZ,
+                accelLen);
   
             break;
         }
@@ -111,10 +114,13 @@ public:
             const auto rotZ = g->rotZ();
 
             terminal::clear(false);
-            out << std::fixed << std::setprecision(1) <<
-                "rotX: " << rotX << "\n"
-                "rotY: " << rotY << "\n"
-                "rotZ: " << rotZ;
+            out << fmt::format( 
+                "rotX: {:.1f}\n"
+                "rotY: {:.1f}\n"
+                "rotZ: {:.1f}",
+                rotX,
+                rotY,
+                rotZ);
 
             break;
         }

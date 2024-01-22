@@ -80,7 +80,7 @@ void ArgumentParser::parse(int argc, char* argv[]) const {
     while (argPtr != end) {
         bool found = false;
         for (size_t i = 0; i < m_args.size(); i++) {
-            if (!passed[i] && m_args[i].get(argPtr, end)) {
+            if (m_args[i].get(argPtr, end)) {
                 passed[i] = true;
                 found = true;
                 break;

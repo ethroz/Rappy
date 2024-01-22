@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <bit>
 #include <concepts>
+#include <limits>
 #include <span>
 #include <string>
 #include <string_view>
@@ -13,6 +14,8 @@ inline std::string tolower(std::string_view sv) {
     std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::tolower(c); });
     return s;
 }
+
+inline std::ostream& operator<<(std::ostream& out, const bool& val) { return out << (val ? "true" : "false"); }
 
 template <typename T>
 constexpr T transform(T value, T min, T max) {
@@ -37,5 +40,10 @@ constexpr T byteswap(T value) noexcept {
 template <typename T>
 constexpr int sign(T val) {
     return int(T(0) < val) - int(val < T(0));
+}
+
+template <std::integral T>
+constexpr float normalize(T val) {
+    return float(val) / std::numeric_limits<decltype(val)>::max();
 }
 
