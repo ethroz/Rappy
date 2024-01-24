@@ -32,7 +32,7 @@ static const std::map<std::string_view, ControlMapFunc> CONTROL_MAP = {
     {"yr", [](const ControllerState& state) { return normalize(state.yRightJoy); }},
     {"rt", [](const ControllerState& state) { return normalize(state.rightTrigger); }},
     {"lrt", [](const ControllerState& state) {
-        return normalize(int32_t(state.rightTrigger) - int32_t(state.leftTrigger)); }}
+        return normalize(int16_t(state.rightTrigger / 2) - int16_t(state.leftTrigger / 2)); }}
 };
 
 ControlMapFunc mappingFromString(std::string_view bind) {
