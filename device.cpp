@@ -36,7 +36,7 @@ public:
         const auto state = device->read();
 
         terminal::clear(false);
-        out << state;
+        logger.info() << state;
 
         std::this_thread::sleep_for(period.ns());
     }

@@ -50,7 +50,7 @@ std::unique_ptr<Controller> Controller::create(
 
 void OscillatorMotor::step() {
     const auto elapsed = m_timer.elapsed();
-    float val = sinf(M_PI * 2.0f / m_period * elapsed);
+    float val = sin(float(M_PI) * 2.0f / m_period * elapsed);
     if (elapsed > m_period) {
         m_timer.reset();
         val = 0.0f;
@@ -66,7 +66,7 @@ void DancingMotor::step() {
     }
 
     const auto elapsed = m_timer.elapsed();
-    float val = sinf(M_PI * 2.0f / m_period * elapsed);
+    float val = sin(float(M_PI) * 2.0f / m_period * elapsed);
     if (elapsed > m_startPeriod * 2.0f) {
         m_timer.reset();
         val = 0.0f;

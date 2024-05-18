@@ -4,7 +4,6 @@
 #include <memory>
 #include <string_view>
 
-#include "utils/Logger.hpp"
 #include "utils/Timer.hpp"
 #include "Color.hpp"
 #include "Light.hpp"
@@ -26,8 +25,7 @@ public:
         Light&& light, 
         const Color& color,
         float brightness,
-        float period,
-        const Logger& logger);
+        float period);
     static ControlMode modeFromString(std::string_view modeStr);
 
     virtual void step() = 0;

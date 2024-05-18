@@ -100,7 +100,7 @@ public:
         const auto state = controller->read();
 
         terminal::clear(false);
-        out << state;
+        logger.info() << state;
 
         for (size_t i = 0; i < motors.size(); i++) {
             const auto val = mappings[i](state); 

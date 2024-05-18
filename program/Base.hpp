@@ -6,6 +6,7 @@
 #include <string_view>
 
 #include "utils/Logger.hpp"
+
 #include "ArgumentParser.hpp"
 
 namespace program {
@@ -24,8 +25,6 @@ protected:
     virtual void init() = 0;
     virtual void loop() = 0;
 
-    const Logger out;
-    const Logger err;
     const std::string prgmName;
     std::atomic_bool running = true;
     ArgumentParser parser;

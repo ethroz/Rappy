@@ -17,14 +17,12 @@ void sigHandler(int signal) {
 }
 
 Base::Base(std::string_view name) noexcept : 
-    out(std::cout), 
-    err(std::cerr),
     prgmName(name),
     parser(name)
 {}
 
 void Base::handler(int signal) {
-    out << " Exitting...";
+    logger.info() << " Exitting...";
     running = false;
 }
 
@@ -43,7 +41,7 @@ int Base::run(int argc, char* argv[]) noexcept {
     }
     catch (const std::exception& e) {
         if (!m_help && argc > 1) {
-            err << fmt::format("Initialization error:\n\n    {}\n", e.what());
+            logger.error() << fmt::format("Initialization error:\n\n    {}\n", e.what());
         }
         help();
         return 1;
@@ -62,7 +60,7 @@ int Base::run(int argc, char* argv[]) noexcept {
         }
     }
     catch (const std::exception& e) {
-        err << e.what();
+        logger.error() << e.what();
         return 1;
     }
 
@@ -81,10 +79,10 @@ void Base::help() const noexcept {
             }
         }
 
-        out << message;
+        logger.info() << message;
     }
     catch (const std::exception& e) {
-        err << fmt::format("Failed to generate help message: {}", e.what());
+        logger.error() << fmt::format("Failed to generate help message: {}", e.what());
     }
 }
 

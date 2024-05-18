@@ -27,7 +27,7 @@ public:
         const auto fSec = std::chrono::duration<float>(1.0f / freq);
         sleepTime = std::chrono::round<std::chrono::nanoseconds>(fSec);        
         
-        out << "Press the button to log a message...";
+        logger.info() << "Press the button to log a message...";
     }
     
     void loop() override {
@@ -36,12 +36,12 @@ public:
         // Rising edge.
         if (pressed && !last && (!toggle || !on)) {
             on = true;
-            out << "Button " << (toggle ? "toggled on" : "pressed");
+            logger.info() << "Button " << (toggle ? "toggled on" : "pressed");
         }
         // Falling edge.
         else if ((!toggle && !pressed && last) || (pressed && !last && on)) {
             on = false;
-            out << "Button " << (toggle ? "toggled off" : "released");
+            logger.info() << "Button " << (toggle ? "toggled off" : "released");
         }
 
         last = pressed;

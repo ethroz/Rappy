@@ -54,7 +54,7 @@ Device Device::fromName(std::string_view name, int timeout) {
     int deviceIndex = -1;
     
     while (deviceIndex < 0) {
-        Log() << "Scanning for devices";
+        logger.info() << "Scanning for devices";
         const auto numDevices = hci_inquiry(deviceId, 1, devices.size(), nullptr, &devicesPtr, flags);
         if (numDevices < 0) {
             throw std::system_error(errno, std::generic_category(), "hci_inquiry");
@@ -63,7 +63,7 @@ Device Device::fromName(std::string_view name, int timeout) {
         for (int i = 0; i < numDevices; i++) {
             std::array<char, 248> charBuffer{};
             if (hci_read_remote_name(devSock, &devices[i].bdaddr, charBuffer.size(), charBuffer.data(), 0) >= 0) {
-                Log() << "Found device: " << charBuffer.data();
+                logger.info() << "Found device: " << charBuffer.data();
                 if (charBuffer.data() == name) {
                     deviceIndex = i;
                     break;
@@ -77,7 +77,7 @@ Device Device::fromName(std::string_view name, int timeout) {
     std::string addrStr;
     addrStr.resize(17);
     ba2str(&addr, addrStr.data());
-    Log() << "Device address: " << addrStr;
+    logger.debug() << "Device address: " << addrStr;
 
     return Device(createSocket(addr));
 }

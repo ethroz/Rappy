@@ -32,7 +32,7 @@ public:
         auto lName = Light::nameFromString(name);
         auto cMode = Controller::modeFromString(mode);
         auto light = Light::create(lName, LightMode::PWM, pins);
-        controller = Controller::create(cMode, std::move(light), color, brightness, period, out);
+        controller = Controller::create(cMode, std::move(light), color, brightness, period);
     }
     
     void loop() override {

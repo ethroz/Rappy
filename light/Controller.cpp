@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <fmt/core.h>
 
+#include "utils/Logger.hpp"
 #include "utils/Other.hpp"
 
 #include "Controller.hpp"
@@ -30,11 +31,10 @@ std::unique_ptr<Controller> Controller::create(
     Light&& light, 
     const Color& color,
     float brightness,
-    float period,
-    const Logger& logger)
+    float period)
 {
     if (mode != ControlMode::CYCLE && light.name() == LightName::DUAL_COLOR_LED && color.B > 0.0f) {
-        logger << "That color will not be represented properly on the Dual-Color LED";
+        logger.warning() << "That color will not be represented properly on the Dual-Color LED";
     }
 
     switch (mode) {
@@ -56,7 +56,7 @@ void LightCycle::step() {
 }
 
 void FlashingLight::step() {
-    const Color col = m_color * ((float(sin(2.0f * float(M_PI) * m_timer.elapsed() / m_period)) + 1.0f) / 2.0f);
+    const Color col = m_color * ((sin(2.0f * float(M_PI) * m_timer.elapsed() / m_period) + 1.0f) / 2.0f);
     m_light.color(col);
 }
 

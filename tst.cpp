@@ -12,9 +12,6 @@
 
 using namespace std::literals;
 
-Logger out;
-Logger err(std::cerr);
-
 int main(int argc, char* argv[]) {
     //for (float f = 1.0f; f > 0.0f; f /= 2.0f) {
     //    auto servo = servo::Motor::create(servo::MotorName::FS90R, 15);
@@ -34,7 +31,7 @@ int main(int argc, char* argv[]) {
     //}
 
     //auto it = v.begin();
-    //out << "Size of vector iterator: " << sizeof(it) << " bytes\n";
+    //logger.info() << "Size of vector iterator: " << sizeof(it) << " bytes\n";
 
     // Get the directory path.
     const std::string dir = "/sys/class/leds/";
@@ -42,7 +39,7 @@ int main(int argc, char* argv[]) {
     // Open the directory
     DIR* dp = opendir(dir.c_str());
     if (dp == NULL) {
-        err << "Invalid directory: " << dir;
+        logger.error() << "Invalid directory: " << dir;
         return 2;
     }
 
@@ -55,7 +52,7 @@ int main(int argc, char* argv[]) {
         case DT_DIR: type = "dir"; break;
         default:     type = "other"; break;
         }
-        out << entry->d_name << " - " << type;
+        logger.info() << entry->d_name << " - " << type;
     }
 
     // Close the directory

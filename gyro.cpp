@@ -95,7 +95,7 @@ public:
             const auto accelLen = std::sqrt(accelX * accelX + accelY * accelY + accelZ * accelZ);
 
             terminal::clear(false);
-            out << fmt::format( 
+            logger.info() << fmt::format( 
                 "accelX: {:.1f}\n"
                 "accelY: {:.1f}\n"
                 "accelZ: {:.1f}\n"
@@ -114,7 +114,7 @@ public:
             const auto rotZ = g->rotZ();
 
             terminal::clear(false);
-            out << fmt::format( 
+            logger.info() << fmt::format( 
                 "rotX: {:.1f}\n"
                 "rotY: {:.1f}\n"
                 "rotZ: {:.1f}",

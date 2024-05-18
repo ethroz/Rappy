@@ -1,0 +1,10 @@
+{
+    "RGB": {
+        "type": "light",
+        "name": "rgb",
+        "pins": [0,1,2],
+        "mode": "cycle",
+        "period": "5s",
+        "brightness": 0.5
+    }
+}
