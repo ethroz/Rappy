@@ -6,9 +6,6 @@ $(shell mkdir -p $(DEPDIR) $(OBJDIR) $(BINDIR))
 # Quiet makefile.
 MAKEFLAGS += --silent
 
-# Multithreaded (but not all the threads)
-MAKEFLAGS += -j3
-
 # Make all rule.
 .PHONY: all clean
 all:
