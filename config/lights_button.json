@@ -4,10 +4,6 @@
             "type": "button",
             "pin": 7,
             "toggle": false
-        },
-        "controller": {
-            "type": "controller",
-            "id": "js0"
         }
     },
     "outputs": {

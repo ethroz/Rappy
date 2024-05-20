@@ -1,0 +1,35 @@
+{
+    "inputs": {
+        "controller": {
+            "type": "controller",
+            "id": "js0"
+        }
+    },
+    "outputs": {
+        "rgb": {
+            "type": "light",
+            "name": "rgb",
+            "pins": [0,1,2],
+            "mode": "cycle",
+            "period": 5
+        },
+        "dual": {
+            "type": "light",
+            "name": "dual",
+            "pins": [15,16],
+            "mode": "flash",
+            "color": "red",
+            "period": "0.5s"
+        }
+    },
+    "connections": [
+        {
+            "input": "controller.rt",
+            "output": "rgb.period"
+        },
+        {
+            "input": "controller.square",
+            "output": "dual.brightness"
+        }
+    ]
+}

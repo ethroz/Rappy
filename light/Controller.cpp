@@ -70,7 +70,7 @@ pi::Consumer LightCycle::getConsumer(std::string_view key) {
 }
 
 pi::Consumer FlashingLight::getConsumer(std::string_view key) {
-    const auto control = LightControlFromString(key);
+    const auto control = LightControlFromString(key.substr(0, key.find('.')));
     switch (control) {
     case LightControl::COLOR: {
         if (key.find('.') == std::string_view::npos) {
@@ -97,6 +97,7 @@ pi::Consumer FlashingLight::getConsumer(std::string_view key) {
 
 void SolidLight::step() {
     const Color col = m_color * m_brightness;
+    logger.debug() << "light::SolidLight::step(): Setting color: " << col;
     m_light.color(col);
 }
    
@@ -107,11 +108,13 @@ void LightCycle::step() {
         hue = 360.0f;
     }
     const Color col = Color::fromHsv(hue, 1.0f, m_brightness);
+    logger.debug() << "light::LightCycle::step(): Setting color: " << col;
     m_light.color(col);
 }
 
 void FlashingLight::step() {
     const Color col = m_color * m_brightness * ((sin(2.0f * float(M_PI) * m_timer.elapsed() / m_period) + 1.0f) / 2.0f);
+    logger.debug() << "light::FlashingLight::step(): Setting color: " << col;
     m_light.color(col);
 }
 

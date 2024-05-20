@@ -1,9 +1,14 @@
 #include <cstdint>
 #include <limits>
 #include <type_traits>
+
 #include <fcntl.h>
 #include <unistd.h>
+
 #include <fmt/format.h>
+
+#include "utils/Enum.hpp"
+#include "utils/Other.hpp"
 
 #include "ControllerState.hpp"
 
@@ -164,8 +169,92 @@ void Controller::poll() {
     }
 }
 
+CREATE_ENUM(ControllerBind, X, CIRCLE, TRIANGLE, SQUARE, LB, RB, SHARE, OPTIONS, PS, LSTICK, RSTICK, LRT, LT, RT, LJOY, RJOY, DPAD)
+CREATE_ENUM(ControllerJoy, X, Y, LEFT, UP, RIGHT, DOWN)
+
 pi::Producer Controller::getProducer(std::string_view key) const {
-    throw std::logic_error("device::Controller::getProducer(): Not implemented");
+    const auto period = key.find('.');
+    auto bindStr = key.substr(0, period);
+    const auto bind = ControllerBindFromString(bindStr);
+
+    const ButtonState* button = nullptr;
+    switch (bind) {
+    case ControllerBind::X:        button = &m_state.xButton; break;
+    case ControllerBind::CIRCLE:   button = &m_state.circleButton; break;
+    case ControllerBind::TRIANGLE: button = &m_state.triangleButton; break;
+    case ControllerBind::SQUARE:   button = &m_state.squareButton; break;
+    case ControllerBind::LB:       button = &m_state.leftBumper; break;
+    case ControllerBind::RB:       button = &m_state.rightBumper; break;
+    case ControllerBind::SHARE:    button = &m_state.shareButton; break;
+    case ControllerBind::OPTIONS:  button = &m_state.optionsButton; break;
+    case ControllerBind::PS:       button = &m_state.playstationButton; break;
+    case ControllerBind::LSTICK:   button = &m_state.leftStick; break;
+    case ControllerBind::RSTICK:   button = &m_state.rightStick; break;
+    default: break;
+    }
+
+    // Handle all the buttons.
+    if (button != nullptr) {
+        return [button]() { return button->pressed ? 1.0f : 0.0f; };
+    }
+
+    // Handle the left and right trigger case.
+    if (bind == ControllerBind::LRT) {
+        return [this]() { return normalize(Axis(m_state.rightTrigger / 2) - Axis(m_state.leftTrigger / 2)); };
+    }
+
+    const uAxis* axis = nullptr;
+    switch (bind) {
+    case ControllerBind::LT: axis = &m_state.leftTrigger; break;
+    case ControllerBind::RT: axis = &m_state.rightTrigger; break;
+    default: break;
+    }
+
+    // Handle the individual triggers.
+    if (axis != nullptr) {
+        return [axis]() { return normalize(*axis); };
+    }
+
+    if (period == std::string_view::npos) {
+        throw std::invalid_argument("All axis binds must contain at least one period");
+    }
+    const auto valueStr = tolower(key.substr(period + 1));
+    const auto value = ControllerJoyFromString(valueStr);
+
+    const Axis* axes = nullptr;
+    switch (bind) {
+    case ControllerBind::LJOY: axes = &m_state.xLeftJoy; break;
+    case ControllerBind::RJOY: axes = &m_state.xRightJoy; break;
+    default: break;
+    }
+
+    // Handle all the joysticks.
+    if (axes != nullptr) {
+        switch (value) {
+        case ControllerJoy::X:     return [axes]() { return normalize(axes[0]); };
+        case ControllerJoy::Y:     return [axes]() { return normalize(axes[1]); };
+        case ControllerJoy::LEFT:  return [axes]() { return normalize(axes[0] < 0 ? -axes[0] : Axis(0)); };
+        case ControllerJoy::UP:    return [axes]() { return normalize(axes[1] > 0 ?  axes[1] : Axis(0)); };
+        case ControllerJoy::RIGHT: return [axes]() { return normalize(axes[0] > 0 ?  axes[0] : Axis(0)); };
+        case ControllerJoy::DOWN:  return [axes]() { return normalize(axes[1] < 0 ? -axes[1] : Axis(0)); };
+        default: throw std::invalid_argument(fmt::format("Unrecognized controller joystick bind: {}", valueStr));
+        }
+    }
+    // Handle the directional pad.
+    else if (bind == ControllerBind::DPAD) {        
+        switch (value) {
+        case ControllerJoy::X:     return [this]() { return float(int((m_state.directionalPad & RIGHT) > 0) - int((m_state.directionalPad & LEFT) > 0)); };
+        case ControllerJoy::Y:     return [this]() { return float(int((m_state.directionalPad & UP   ) > 0) - int((m_state.directionalPad & DOWN) > 0)); };
+        case ControllerJoy::LEFT:  return [this]() { return float((m_state.directionalPad & LEFT ) > 0); };
+        case ControllerJoy::UP:    return [this]() { return float((m_state.directionalPad & UP   ) > 0); };
+        case ControllerJoy::RIGHT: return [this]() { return float((m_state.directionalPad & RIGHT) > 0); };
+        case ControllerJoy::DOWN:  return [this]() { return float((m_state.directionalPad & DOWN ) > 0); };
+        default: throw std::invalid_argument(fmt::format("Unrecognized controller directional pad bind: {}", valueStr));
+        }
+    }
+    else {
+        throw std::invalid_argument(fmt::format("Unrecognized controller bind: {}", key));
+    }
 }
 
 } // namespace device

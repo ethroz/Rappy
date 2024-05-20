@@ -4,6 +4,7 @@
 #include <pigpio.h>
 #include <fmt/format.h>
 
+#include "utils/Logger.hpp"
 #include "utils/Other.hpp"
 #include "utils/PigpioError.hpp"
 
@@ -22,6 +23,7 @@ OutputPin::OutputPin(const PinConfig& config) :
 }
 
 void OutputPin::set(float val) {
+    logger.trace() << "wiring::OutputPin::set(): Value: " << val;
     m_val = std::clamp(val, 0.0f, 1.0f);
     const auto write = (m_val < 0.5f) != m_invert ? PI_LOW : PI_HIGH;
     const auto res = gpioWrite(m_pin, write);

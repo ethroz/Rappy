@@ -108,25 +108,23 @@ public:
             }
         }
 
-        logger.debug() << "Prgm::init(): Inputs:" << [this](){
+        logger.debug() << "Prgm::init(): Inputs:\n" << [this](){
             std::stringstream out;
             for (const auto& [name, input] : inputs) {
-                out << '\n' << name << ": " << input->type();
+                out << name << ": " << input->type() << '\n';
             }
             return out.str();
         }();
-        logger.debug() << "Prgm::init(): Outputs:" << [this](){
+        logger.debug() << "Prgm::init(): Outputs:\n" << [this](){
             std::stringstream out;
             for (const auto& [name, output] : outputs) {
-                out << '\n' << name << ": " << output->type();
+                out << name << ": " << output->type() << '\n';
             }
             return out.str();
         }();
     }
     
     void loop() override {
-        // running = false;
-        // return;
         Timer timer(true);
         logger.debug() << "Prgm::loop()";
         for (const auto& [name, input] : inputs) {
@@ -144,6 +142,8 @@ public:
             const auto remaining = period.ns() - elapsed;
             logger.trace() << "Prgm::loop(): Sleeping for " << remaining.count() << "ns";
             std::this_thread::sleep_for(remaining);
+            logger.trace() << "Prgm::loop(): Slept for " << (timer.elapsed().ns() - elapsed).count() << "ns";
+            logger.trace() << "Prgm::loop(): Loop took " << timer.elapsed().ns().count() << "ns";
         }
     }
 
