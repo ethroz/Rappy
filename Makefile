@@ -1,32 +1,46 @@
-include Makefile.common
-
-BINS := $(BINSRC:%.cpp=%)
-
-# Make sure the directories exist.
-$(shell mkdir -p $(DEPDIR) $(OBJDIR) $(BINDIR))
-
 # Quiet makefile.
 MAKEFLAGS += --silent
 
+# Get all the binaries.
+BINSRC := $(wildcard *.cpp)
+BINS := $(BINSRC:%.cpp=%)
+
 # Make all rule.
-.PHONY: all clean none $(BINS)
+.PHONY: all clean release $(BINS)
+.ONESHELL:
 all:
 	@echo Building all
 	@date +%s > /tmp/.time
-	$(MAKE) -f Makefile.d
-	$(MAKE) -f Makefile.mk
+	@cd build
+	@cmake .. -DCMAKE_BUILD_TYPE=Debug
+	$(MAKE)
 	@echo "Done ($$(($$(date +%s)-$$(cat /tmp/.time)))s)"
 
 # Clean rule.
+.ONESHELL:
 clean:
-	rm -rf $(OBJDIR)/* $(DEPDIR)/* $(DEPDIR)/.stamp* $(BINDIR)/*
+	@cd build
+	$(MAKE) clean
+
+# Release rule
+.ONESHELL:
+release:
+	@echo Building all for Release
+	@date +%s > /tmp/.time
+	@cd build
+	@cmake .. -DCMAKE_BUILD_TYPE=Release
+	$(MAKE)
+	@echo "Done ($$(($$(date +%s)-$$(cat /tmp/.time)))s)"
 
 # Pattern to build a specific binary.
 define BINARY_RULE
+.ONESHELL:
 $(1):
 	@echo Building $(1)
-	$(MAKE) -f Makefile.d
-	$(MAKE) -f Makefile.mk bin/$(1)
+	@date +%s > /tmp/.time
+	@cd build
+	$(MAKE) $(1)
+	@echo "Done ($$$$(($$$$(date +%s)-$$$$(cat /tmp/.time)))s)"
 endef
 
 $(foreach bin,$(BINS),$(eval $(call BINARY_RULE,$(bin))))

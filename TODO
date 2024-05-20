@@ -1,16 +1,13 @@
 Make a universal program to connect any components with any components.
 
-Convert the build system to cmake
-Use precompiled headers to speed things up.
-
-Design the car
-Build the car
-Drive the car
-
 Make gyrometer have a save file that can be used for saving calibrations
 Make a self test for the gyrometer
 Make a calibration process for the gyrometer
 Make a program to measure distance with the ultrasonic ranger
+
+Design the car
+Build the car
+Drive the car
 
 NOTES:
 command to watch controller input:

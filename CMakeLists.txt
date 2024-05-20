@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.16)
 project(Rappy VERSION 1.0.0 LANGUAGES CXX)
 
 # Set the C++ standard
@@ -10,42 +10,27 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb3")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-# Define the relevant directories
-set(DEPDIR "${CMAKE_CURRENT_SOURCE_DIR}/dep")
-set(OBJDIR "${CMAKE_CURRENT_BINARY_DIR}/obj")
-set(BINDIR "${CMAKE_CURRENT_BINARY_DIR}/bin")
-
-# Create the directories
-file(MAKE_DIRECTORY ${DEPDIR})
-file(MAKE_DIRECTORY ${OBJDIR})
-file(MAKE_DIRECTORY ${BINDIR})
-
 # Find all source files
-file(GLOB_RECURSE SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+file(GLOB MAIN_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp")
+file(GLOB_RECURSE SRC_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*/**.cpp")
+file(GLOB_RECURSE HEADERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.hpp")
+list(FILTER SRC_FILES EXCLUDE REGEX "build/.*")
+list(FILTER HEADERS EXCLUDE REGEX "build/.*")
 
 # Define libraries to link with
 set(LIBS -lpthread -lpigpio -lrt -lbluetooth -lfmt)
 
 # Include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/include)
+
+# Make an object library.
+add_library(common OBJECT ${SRC_FILES})
+target_precompile_headers(common PUBLIC ${HEADERS})
 
 # Add the executable
-foreach(SRC_FILE ${SRC_FILES})
-    get_filename_component(BIN_NAME ${SRC_FILE} NAME_WE)
-    add_executable(${BIN_NAME} ${SRC_FILE})
+foreach(MAIN_FILE ${MAIN_FILES})
+    get_filename_component(BIN_NAME ${MAIN_FILE} NAME_WE)
+    add_executable(${BIN_NAME} ${MAIN_FILE} $<TARGET_OBJECTS:common>)
     target_link_libraries(${BIN_NAME} ${LIBS})
-    set_target_properties(${BIN_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BINDIR})
+    install(CODE "execute_process(sudo chown bin/${BIN_NAME} && sudo chmod u+s bin/${BIN_NAME})")
 endforeach()
-
-# Custom target for clean command
-add_custom_target(clean
-   COMMAND ${CMAKE_COMMAND} -P clean.cmake
-)
-
-# Create clean-all.cmake script
-file(WRITE clean.cmake "
-file(REMOVE_RECURSE ${OBJDIR}/*)
-file(REMOVE_RECURSE ${DEPDIR}/*)
-file(REMOVE_RECURSE ${BINDIR}/*)
-")

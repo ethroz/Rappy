@@ -1,7 +1,4 @@
 *.swp
-bin
-dep
-obj
 build
 *.cmake
 .vscode
