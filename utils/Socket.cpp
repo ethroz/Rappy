@@ -3,7 +3,7 @@
 #include <poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "Other.hpp"
 

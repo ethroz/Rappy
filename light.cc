@@ -1,6 +1,6 @@
 #include <chrono>
 #include <thread>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "light/Color.hpp"
 #include "light/Light.hpp"

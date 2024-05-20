@@ -58,5 +58,5 @@ int main(int argc, char* argv[]) {
     // Close the directory
     closedir(dp);
 
-    return 0;}
-
+    return 0;
+}

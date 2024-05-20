@@ -2,7 +2,7 @@
 #include <charconv>
 #include <stdexcept>
 #include <vector>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "light/Color.hpp"
 #include "utils/Duration.hpp"

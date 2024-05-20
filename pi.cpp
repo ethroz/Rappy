@@ -1,25 +1,26 @@
 #include <chrono>
-#include <cmath>
-#include <cstdint>
-#include <iomanip>
 #include <map>
 #include <memory>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 #include <thread>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
-#include <boost/json/src.hpp>
-
-#include "light/Controller.hpp"
+#include "pi/Input.hpp"
+#include "pi/Output.hpp"
 #include "utils/Duration.hpp"
 #include "utils/File.hpp"
+#include "utils/JsonHelper.hpp"
+#include "utils/Timer.hpp"
 
 #include "program/Base.hpp"
 
 using namespace program;
-using namespace boost::json;
+using namespace pi;
+using namespace boost;
 using namespace std::literals;
 
 std::string documentation =
@@ -29,30 +30,12 @@ An object of named devices. Example:
 "alias": {
     "type": "light",
     "name": "rgb",
-    "pins": [0,1,2],
     "mode": "cycle",
+    "pins": [0,1,2],
+    "pin-mode": "pwm",
     "period": "5s",
     "brightness": 0.5
 })";
-
-enum class Type : uint8_t {
-    LIGHT
-};
-
-static const std::map<std::string_view, Type> TYPE_MAP = {
-    {"light", Type::LIGHT}
-};
-
-Type typeFromString(std::string_view mode) {
-    const auto typeStr = tolower(mode);
-
-    const auto it = TYPE_MAP.find(typeStr);
-    if (it == TYPE_MAP.end()) {
-        throw std::invalid_argument(fmt::format("Unrecognized type: {}", typeStr));
-    }
-
-    return it->second;
-}
 
 class Prgm : public Base {
 public:
@@ -64,35 +47,115 @@ public:
     }
 
     void init() override {
-        std::string json = readFile("config.json");
-        object root = parse(json).as_object();
+        const auto file = readFile(path);
+        logger.trace() << "Prgm::init(): File contents:\n" << file;
+        json = parse(file);
+        const auto& root = getAsObjectOrThrow(json, "Prgm::init()");
+        logger.trace() << "Prgm::init(): Config:\n" << root;
 
-        for (const auto& [alias, config] : root) {
-            const auto type = value_to<std::string_view>(config.at("type"));
-            logger.info() << "Alias: " << alias << ". Type: " << type;
+        if (auto* v = root.if_contains("inputs")) {
+            const auto& inputsCfg = getAsObjectOrThrow(*v, "Prgm::init()");
+            for (const auto& [alias, config] : inputsCfg) {
+                const auto& cfg = getAsObjectOrThrow(config, "Prgm::init()");
+                inputs[alias] = pi::Input::create(cfg);
+            }
         }
-        // auto lName = Light::nameFromString(name);
-        // auto cMode = Controller::modeFromString(mode);
-        // auto light = Light::create(lName, LightMode::PWM, pins);
-        // controller = Controller::create(cMode, std::move(light), color, brightness, period, out);
-        // device = std::make_unique<Device<ControllerState>>(id);
+
+        if (auto* v = root.if_contains("outputs")) {
+            const auto& outputsCfg = getAsObjectOrThrow(*v, "Prgm::init()");
+            for (const auto& [alias, config] : outputsCfg) {
+                const auto& cfg = getAsObjectOrThrow(config, "Prgm::init()");
+                outputs[alias] = pi::Output::create(cfg);
+            }
+        }
+
+        if (auto* v = root.if_contains("connections")) {
+            const auto& connectCfg = getAsArrayOrThrow(*v, "Prgm::init()");
+            for (const auto& config : connectCfg) {
+                const auto& cfg = getAsObjectOrThrow(config, "Prgm::init()");
+
+                const auto inputStr = getAsStringViewOrThrow(cfg, "input", "Prgm::init()");
+                const auto outputStr = getAsStringViewOrThrow(cfg, "output", "Prgm::init()");
+
+                const auto inputPeriod = inputStr.find('.');
+                const auto outputPeriod = outputStr.find('.');
+                if (inputPeriod == std::string_view::npos || outputPeriod == std::string_view::npos) {
+                    throw std::invalid_argument("Connections must contain at least one period");
+                }
+
+                const auto input = inputStr.substr(0, inputPeriod);
+                const auto output = outputStr.substr(0, outputPeriod);
+
+                if (!inputs.contains(input)) {
+                    throw std::invalid_argument(fmt::format("Invalid input: {}", input));
+                }
+                if (!outputs.contains(output)) {
+                    throw std::invalid_argument(fmt::format("Invalid output: {}", output));
+                }
+
+                const auto inputKey = inputStr.substr(inputPeriod + 1);
+                const auto outputKey = outputStr.substr(outputPeriod + 1);
+
+                auto producer = inputs[input]->getProducer(inputKey);
+                auto consumer = outputs[output]->getConsumer(outputKey);
+
+                logger.debug() << "Prgm::init(): Adding connection: " << inputStr << " > " << outputStr;
+
+                connections.emplace_back(
+                    [producer = std::move(producer), consumer = std::move(consumer)]() {
+                        consumer(producer());
+                    });
+            }
+        }
+
+        logger.debug() << "Prgm::init(): Inputs:" << [this](){
+            std::stringstream out;
+            for (const auto& [name, input] : inputs) {
+                out << '\n' << name << ": " << input->type();
+            }
+            return out.str();
+        }();
+        logger.debug() << "Prgm::init(): Outputs:" << [this](){
+            std::stringstream out;
+            for (const auto& [name, output] : outputs) {
+                out << '\n' << name << ": " << output->type();
+            }
+            return out.str();
+        }();
     }
     
     void loop() override {
-        // const auto state = device->read();
-
-        // terminal::clear(false);
-        // logger.info() << state;
-
-        // std::this_thread::sleep_for(period.ns());
+        // running = false;
+        // return;
+        Timer timer(true);
+        logger.debug() << "Prgm::loop()";
+        for (const auto& [name, input] : inputs) {
+            input->poll();
+        }
+        for (const auto& connection : connections) {
+            connection();
+        }
+        for (const auto& [name, output] : outputs) {
+            output->step();
+        }
+        const nanoseconds elapsed = timer.elapsed();
+        logger.trace() << "Prgm::loop(): I/O took " << elapsed.count() << "ns";
+        if (elapsed < period.ns()) {
+            const auto remaining = period.ns() - elapsed;
+            logger.trace() << "Prgm::loop(): Sleeping for " << remaining.count() << "ns";
+            std::this_thread::sleep_for(remaining);
+        }
     }
 
 private:
     std::string path;
-    std::vector<light::Controller> lights;
+    json::value json;
+    Duration period = 10ms;
+    std::map<std::string_view, std::unique_ptr<Input>> inputs;
+    std::vector<std::function<void()>> connections;
+    std::map<std::string_view, std::unique_ptr<Output>> outputs;
 };
 
 int main(int argc, char* argv[]) {
     return std::make_unique<Prgm>(argv[0])->run(argc, argv);
 }
-

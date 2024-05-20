@@ -2,7 +2,7 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "servo/Controller.hpp"
 #include "servo/Motor.hpp"

@@ -18,7 +18,8 @@ public:
     T read(int reg) const;
 
 private:
-    const Context m_context;
+    const Context m_contextData;
+    const Context m_contextClock;
     const unsigned m_handle;
     const bool m_bigEndian;
 };

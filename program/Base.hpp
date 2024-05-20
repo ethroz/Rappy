@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -32,6 +33,7 @@ protected:
     std::vector<std::string> examples;
 
 private:
+    int logLevel;
     bool m_help = false;
 };
 

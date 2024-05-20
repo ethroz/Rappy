@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string_view>
+
 namespace wiring {
 
 enum class PinMode : uint8_t {
@@ -9,6 +11,10 @@ enum class PinMode : uint8_t {
     PWM,
     SERVO
 };
+
+PinMode modeFromString(std::string_view mode);
+
+int pinRemap(int pin);
 
 struct PwmConfig {    
     // Default sample rate is 5 us.
@@ -26,4 +32,3 @@ struct PinConfig {
 };
 
 } // namespace wiring
-

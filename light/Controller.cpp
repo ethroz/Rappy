@@ -1,7 +1,11 @@
 #include <cmath>
 #include <stdexcept>
-#include <fmt/core.h>
 
+#include <fmt/format.h>
+
+#include "utils/Duration.hpp"
+#include "utils/Enum.hpp"
+#include "utils/JsonHelper.hpp"
 #include "utils/Logger.hpp"
 #include "utils/Other.hpp"
 
@@ -9,40 +13,91 @@
 
 namespace light {
 
-static const std::map<std::string_view, ControlMode> MODE_MAP = {
-    {"solid", ControlMode::SOLID},
-    {"cycle", ControlMode::CYCLE},
-    {"flash", ControlMode::FLASH}
-};
+CREATE_ENUM(ControlMode, SOLID, CYCLE, FLASH)
 
-ControlMode Controller::modeFromString(std::string_view mode) {
-    const auto modeStr = tolower(mode);
+std::unique_ptr<Controller> Controller::create(const json::object& cfg, Light&& light) {
+    const auto mode = ControlModeFromString(getAsStringViewOrThrow(cfg, "mode", "light::Controller::create()"));
+    const auto color = Color::fromString(getAsStringViewOr(cfg, "color", "white"));
+    const auto brightness = getAsFloatOr(cfg, "brightness", 1.0f);
+    const auto period = getAsDurationOr(cfg, "period", 1.0f).get();
 
-    const auto it = MODE_MAP.find(modeStr);
-    if (it == MODE_MAP.end()) {
-        throw std::invalid_argument(fmt::format("Unrecognized control mode: {}", modeStr));
-    }
-
-    return it->second;
-}
-
-std::unique_ptr<Controller> Controller::create(
-    ControlMode mode, 
-    Light&& light, 
-    const Color& color,
-    float brightness,
-    float period)
-{
     if (mode != ControlMode::CYCLE && light.name() == LightName::DUAL_COLOR_LED && color.B > 0.0f) {
         logger.warning() << "That color will not be represented properly on the Dual-Color LED";
     }
 
     switch (mode) {
+    case ControlMode::SOLID: return std::make_unique<SolidLight>(std::move(light), color, brightness);
     case ControlMode::CYCLE: return std::make_unique<LightCycle>(std::move(light), brightness, period);
-    case ControlMode::SOLID: return std::make_unique<SolidLight>(std::move(light), color * brightness);
-    case ControlMode::FLASH: return std::make_unique<FlashingLight>(std::move(light), color * brightness, period);
-    default: throw std::invalid_argument(fmt::format("Invalid control mode: {}", to_underlying(mode)));
+    case ControlMode::FLASH: return std::make_unique<FlashingLight>(std::move(light), color, brightness, period);
+    default: throw std::invalid_argument(fmt::format("light::Controller::create(): Invalid control mode: {}", to_underlying(mode)));
     }
+}
+
+CREATE_ENUM(LightControl, COLOR, BRIGHTNESS, PERIOD)
+
+pi::Consumer SolidLight::getConsumer(std::string_view key) {
+    const auto control = LightControlFromString(key.substr(0, key.find('.')));
+    switch (control) {
+    case LightControl::COLOR: {
+        if (key.find('.') == std::string_view::npos) {
+            return [this](float value) { m_color = value; };
+        }
+        else {
+            const auto channel = key.substr(key.find('.') + 1);
+            if (channel.size() != 1) {
+                throw std::invalid_argument(fmt::format("Unrecognized color channel: {}", channel));
+            }
+            switch (std::tolower(channel[0])) {
+            case 'r': return [this](float value) { m_color.R = value; };
+            case 'g': return [this](float value) { m_color.G = value; };
+            case 'b': return [this](float value) { m_color.B = value; };
+            default: throw std::invalid_argument(fmt::format("Unrecognized color channel: {}", channel));
+            }
+        }
+    }
+    case LightControl::BRIGHTNESS: return [this](float value) { m_brightness = value; };
+    default: throw std::invalid_argument(fmt::format("Unrecognized light control: {}", key));
+    }
+}
+
+pi::Consumer LightCycle::getConsumer(std::string_view key) {
+    const auto control = LightControlFromString(key);
+    switch (control) {
+    case LightControl::BRIGHTNESS: return [this](float value) { m_brightness = value; };
+    case LightControl::PERIOD: return [this](float value) { m_period = value; };
+    default: throw std::invalid_argument(fmt::format("Unrecognized light control: {}", key));
+    }
+}
+
+pi::Consumer FlashingLight::getConsumer(std::string_view key) {
+    const auto control = LightControlFromString(key);
+    switch (control) {
+    case LightControl::COLOR: {
+        if (key.find('.') == std::string_view::npos) {
+            return [this](float value) { m_color = value; };
+        }
+        else {
+            const auto channel = key.substr(key.find('.') + 1);
+            if (channel.size() != 1) {
+                throw std::invalid_argument(fmt::format("Unrecognized color channel: {}", channel));
+            }
+            switch (std::tolower(channel[0])) {
+            case 'r': return [this](float value) { m_color.R = value; };
+            case 'g': return [this](float value) { m_color.G = value; };
+            case 'b': return [this](float value) { m_color.B = value; };
+            default: throw std::invalid_argument(fmt::format("Unrecognized color channel: {}", channel));
+            }
+        }
+    }
+    case LightControl::BRIGHTNESS: return [this](float value) { m_brightness = value; };
+    case LightControl::PERIOD: return [this](float value) { m_period = value; };
+    default: throw std::invalid_argument(fmt::format("Unrecognized light control: {}", key));
+    }
+}
+
+void SolidLight::step() {
+    const Color col = m_color * m_brightness;
+    m_light.color(col);
 }
    
 void LightCycle::step() {
@@ -56,7 +111,7 @@ void LightCycle::step() {
 }
 
 void FlashingLight::step() {
-    const Color col = m_color * ((sin(2.0f * float(M_PI) * m_timer.elapsed() / m_period) + 1.0f) / 2.0f);
+    const Color col = m_color * m_brightness * ((sin(2.0f * float(M_PI) * m_timer.elapsed() / m_period) + 1.0f) / 2.0f);
     m_light.color(col);
 }
 

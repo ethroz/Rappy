@@ -15,7 +15,11 @@ inline std::string tolower(std::string_view sv) {
     return s;
 }
 
-inline std::ostream& operator<<(std::ostream& out, const bool& val) { return out << (val ? "true" : "false"); }
+inline std::string toupper(std::string_view sv) {
+    std::string s(sv);
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::toupper(c); });
+    return s;
+}
 
 template <typename T>
 constexpr T transform(T value, T min, T max) {

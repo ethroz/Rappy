@@ -1,8 +1,10 @@
 #include <stdexcept>
 #include <string>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "Duration.hpp"
+
+using namespace std::chrono;
 
 void Duration::set(std::string_view str) {
     if (str.empty()) {
@@ -36,11 +38,17 @@ void Duration::set(std::string_view str) {
     }
 
     const auto time = std::stof(std::string(str));
-    m_value = time * scale;
+    set(time * scale);
 }
 
-std::chrono::nanoseconds Duration::ns() const {
-    using namespace std::chrono;
-    return round<nanoseconds>(duration<float>{m_value});
+void Duration::set(float value) {
+    m_value = round<nanoseconds>(duration<float>{value});
 }
 
+milliseconds Duration::ms() const {
+    return round<milliseconds>(m_value);
+}
+
+float Duration::get() const {
+    return duration_cast<duration<float>>(m_value).count();
+}

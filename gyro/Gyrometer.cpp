@@ -4,7 +4,7 @@
 #include <cmath>
 #include <limits>
 #include <thread>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "utils/Logger.hpp"
 #include "utils/Other.hpp"

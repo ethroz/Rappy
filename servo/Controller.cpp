@@ -2,7 +2,7 @@
 #include <cmath>
 #include <map>
 #include <stdexcept>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "utils/Other.hpp"
 
@@ -49,7 +49,7 @@ std::unique_ptr<Controller> Controller::create(
 }
 
 void OscillatorMotor::step() {
-    const auto elapsed = m_timer.elapsed();
+    const float elapsed = m_timer.elapsed();
     float val = sin(float(M_PI) * 2.0f / m_period * elapsed);
     if (elapsed > m_period) {
         m_timer.reset();
@@ -65,7 +65,7 @@ void DancingMotor::step() {
         m_period = m_startPeriod;
     }
 
-    const auto elapsed = m_timer.elapsed();
+    const float elapsed = m_timer.elapsed();
     float val = sin(float(M_PI) * 2.0f / m_period * elapsed);
     if (elapsed > m_startPeriod * 2.0f) {
         m_timer.reset();

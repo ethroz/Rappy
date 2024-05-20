@@ -2,6 +2,12 @@
 
 using namespace std::chrono_literals;
 
+Timer::Timer(bool start) {
+    if (start) {
+        this->start();
+    }
+}
+
 void Timer::start() { 
     m_running = true; 
     reset();
@@ -16,8 +22,7 @@ void Timer::stop() {
     m_timeStop = Clock::now();
 }
 
-float Timer::elapsed() const {
-    TS timeStop = m_running ? Clock::now() : m_timeStop;
-    return std::chrono::duration<float>(timeStop - m_timeStart).count();
+Duration Timer::elapsed() const {
+    Clock::time_point timeStop = m_running ? Clock::now() : m_timeStop;
+    return Duration(timeStop - m_timeStart);
 }
-

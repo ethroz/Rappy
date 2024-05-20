@@ -4,7 +4,7 @@
 #include <map>
 #include <memory>
 #include <thread>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "gyro/Gyrometer.hpp"
 #include "utils/Duration.hpp"

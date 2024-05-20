@@ -1,6 +1,6 @@
 #include <endian.h>
 #include <pigpio.h>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "utils/Other.hpp"
 #include "utils/PigpioError.hpp"
@@ -12,6 +12,8 @@ namespace wiring {
 static constexpr unsigned I2C_BUS = 1;
 
 I2cDevice::I2cDevice(uint8_t address, bool bigEndian) : 
+    m_contextData(0),
+    m_contextClock(1),
     m_handle(pigpio::checkError(i2cOpen(I2C_BUS, address, 0))),
     m_bigEndian(bigEndian)
 {}

@@ -3,16 +3,16 @@
 #include <type_traits>
 #include <fcntl.h>
 #include <unistd.h>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "ControllerState.hpp"
 
-#include "Device.hpp"
+#include "Controller.hpp"
 
 namespace device {
 
-template <>
-Device<ControllerState>::Device(std::string_view id) : 
+Controller::Controller(std::string_view id) : 
+    pi::Input(id),
     m_socket(open(fmt::format("/dev/input/{}", id).c_str(), O_RDONLY))
 {}
 
@@ -74,8 +74,7 @@ private:
 };
 static_assert(std::is_trivially_copyable_v<ControllerEvent>);
 
-template <>
-const ControllerState& Device<ControllerState>::read() {
+void Controller::poll() {
     const auto buffer = m_socket.read();
 
     if (buffer.size() % sizeof(ControllerEvent) != 0) {
@@ -163,9 +162,10 @@ const ControllerState& Device<ControllerState>::read() {
         default: throw std::logic_error(fmt::format("Unknown controller event type: {}", event.type()));
         }
     }
+}
 
-    return m_state;
+pi::Producer Controller::getProducer(std::string_view key) const {
+    throw std::logic_error("device::Controller::getProducer(): Not implemented");
 }
 
 } // namespace device
-

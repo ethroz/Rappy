@@ -1,7 +1,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "bluetooth/Device.hpp"
 

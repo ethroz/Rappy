@@ -1,7 +1,7 @@
 #include <cmath>
 #include <map>
 #include <stdexcept>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "utils/Other.hpp"
 

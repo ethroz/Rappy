@@ -2,7 +2,9 @@
 #include <iostream>
 #include <span>
 #include <stdexcept>
-#include <fmt/core.h>
+#include <fmt/format.h>
+
+#include "utils/Other.hpp"
 
 #include "ArgumentParser.hpp"
 
@@ -18,7 +20,8 @@ void sigHandler(int signal) {
 
 Base::Base(std::string_view name) noexcept : 
     prgmName(name),
-    parser(name)
+    parser(name),
+    logLevel(to_underlying(logger.logLevel()))
 {}
 
 void Base::handler(int signal) {
@@ -30,13 +33,15 @@ int Base::run(int argc, char* argv[]) noexcept {
     try {
         // Add this after all other arguments.
         parser.addOptional(m_help, "help", "Displays the help information");
+        parser.addOptional(logLevel, "log-level", "The verbosity of the logs.");
 
         if (ptr) {
-            throw std::logic_error("Should only have one program class per program");
+            throw std::logic_error("Base::run(): Only allowed one program class per program");
         }
         ptr = this;
     
         parser.parse(argc, argv);
+        logger.logLevel(LogLevel(logLevel));
         init();
     }
     catch (const std::exception& e) {
@@ -82,7 +87,7 @@ void Base::help() const noexcept {
         logger.info() << message;
     }
     catch (const std::exception& e) {
-        logger.error() << fmt::format("Failed to generate help message: {}", e.what());
+        logger.error() << fmt::format("Base::help(): Failed to generate help message: {}", e.what());
     }
 }
 

@@ -11,11 +11,14 @@ set(CMAKE_CXX_FLAGS_DEBUG "-ggdb3")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 # Find all source files
-file(GLOB MAIN_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp")
-file(GLOB_RECURSE SRC_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*/**.cpp")
-file(GLOB_RECURSE HEADERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.hpp")
+file(GLOB MAIN_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+file(GLOB_RECURSE SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*/**.cpp")
+file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
 list(FILTER SRC_FILES EXCLUDE REGEX "build/.*")
 list(FILTER HEADERS EXCLUDE REGEX "build/.*")
+
+# Set the bin directory.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Define libraries to link with
 set(LIBS -lpthread -lpigpio -lrt -lbluetooth -lfmt)
@@ -32,5 +35,10 @@ foreach(MAIN_FILE ${MAIN_FILES})
     get_filename_component(BIN_NAME ${MAIN_FILE} NAME_WE)
     add_executable(${BIN_NAME} ${MAIN_FILE} $<TARGET_OBJECTS:common>)
     target_link_libraries(${BIN_NAME} ${LIBS})
-    install(CODE "execute_process(sudo chown bin/${BIN_NAME} && sudo chmod u+s bin/${BIN_NAME})")
+    add_custom_command(
+        TARGET ${BIN_NAME} POST_BUILD
+        COMMAND sudo chown root ${BIN_NAME}
+        COMMAND sudo chmod u+s ${BIN_NAME}
+        WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        VERBATIM)
 endforeach()

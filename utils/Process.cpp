@@ -5,7 +5,7 @@
 #include <stack>
 #include <system_error>
 #include <type_traits>
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <poll.h>
 #include <sys/wait.h>
 #include <unistd.h>

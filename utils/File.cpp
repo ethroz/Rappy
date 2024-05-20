@@ -1,7 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "File.hpp"
 

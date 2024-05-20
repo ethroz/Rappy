@@ -1,0 +1,40 @@
+{
+    "inputs": {
+        "button": {
+            "type": "button",
+            "pin": 7,
+            "toggle": false
+        },
+        "controller": {
+            "type": "controller",
+            "id": "js0"
+        }
+    },
+    "outputs": {
+        "rgb": {
+            "type": "light",
+            "name": "rgb",
+            "pins": [0,1,2],
+            "mode": "cycle",
+            "period": 5
+        },
+        "dual": {
+            "type": "light",
+            "name": "dual",
+            "pins": [15,16],
+            "mode": "flash",
+            "color": "red",
+            "period": "0.5s"
+        }
+    },
+    "connections": [
+        {
+            "input": "button.value",
+            "output": "rgb.brightness"
+        },
+        {
+            "input": "button.value",
+            "output": "dual.brightness"
+        }
+    ]
+}

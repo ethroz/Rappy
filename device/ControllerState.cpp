@@ -38,7 +38,7 @@ std::ostream& operator<<(std::ostream& out, const Direction& dir) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ControllerState& state) {
-    return out << 
+    return out << std::boolalpha <<
         "X:        " << state.xButton.pressed << "\n"
         "Circle:   " << state.circleButton.pressed << "\n"
         "Triangle: " << state.triangleButton.pressed << "\n"
@@ -62,4 +62,3 @@ std::ostream& operator<<(std::ostream& out, const ControllerState& state) {
         "\n"
         "DPad: " << state.directionalPad;
 }
-

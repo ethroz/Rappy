@@ -5,7 +5,7 @@
 #include <map>
 #include <memory>
 #include <thread>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "device/Device.hpp"
 #include "device/ControllerState.hpp"
