@@ -6,13 +6,12 @@ BINSRC := $(wildcard *.cpp)
 BINS := $(BINSRC:%.cpp=%)
 
 # Make all rule.
-.PHONY: all clean release $(BINS)
+.PHONY: all clean debug normal release $(BINS)
 .ONESHELL:
 all:
 	@echo Building all
 	@date +%s > /tmp/.time
 	@cd build
-	@cmake .. -DCMAKE_BUILD_TYPE=Debug
 	$(MAKE)
 	@echo "Done ($$(($$(date +%s)-$$(cat /tmp/.time)))s)"
 
@@ -22,11 +21,34 @@ clean:
 	@cd build
 	$(MAKE) clean
 
+# Debug rule
+.ONESHELL:
+debug:
+	@echo Building all for Debug
+	@date +%s > /tmp/.time
+	@mkdir -p build
+	@cd build
+	@cmake .. -DCMAKE_BUILD_TYPE=Debug
+	$(MAKE)
+	@echo "Done ($$(($$(date +%s)-$$(cat /tmp/.time)))s)"
+
+# Debug rule
+.ONESHELL:
+normal:
+	@echo Building all unoptimized
+	@date +%s > /tmp/.time
+	@mkdir -p build
+	@cd build
+	@cmake .. -DCMAKE_BUILD_TYPE=
+	$(MAKE)
+	@echo "Done ($$(($$(date +%s)-$$(cat /tmp/.time)))s)"
+
 # Release rule
 .ONESHELL:
 release:
 	@echo Building all for Release
 	@date +%s > /tmp/.time
+	@mkdir -p build
 	@cd build
 	@cmake .. -DCMAKE_BUILD_TYPE=Release
 	$(MAKE)
