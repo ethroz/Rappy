@@ -1,10 +1,10 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <format>
 #include <map>
 #include <memory>
 #include <thread>
-#include <fmt/format.h>
 
 #include "gyro/Gyrometer.hpp"
 #include "utils/Duration.hpp"
@@ -33,7 +33,7 @@ GyroMode modeFromString(std::string_view mode) {
 
     const auto it = MODE_MAP.find(modeStr);
     if (it == MODE_MAP.end()) {
-        throw std::invalid_argument(fmt::format("Unrecognized gyro mode: {}", modeStr));
+        throw std::invalid_argument(std::format("Unrecognized gyro mode: {}", modeStr));
     }
 
     return it->second;
@@ -57,8 +57,8 @@ public:
         parser.addOptional(test, "test", "Test the gyrometer against its factory trim.");
         // TODO: Add options for accel max and gyro max.
 
-        examples.push_back(fmt::format("{} Accel --calibrate --period 10ms", prgmName));
-        examples.push_back(fmt::format("{} Gyro --test", prgmName));
+        examples.push_back(std::format("{} Accel --calibrate --period 10ms", prgmName));
+        examples.push_back(std::format("{} Gyro --test", prgmName));
     }
 
     void init() override {
@@ -95,7 +95,7 @@ public:
             const auto accelLen = std::sqrt(accelX * accelX + accelY * accelY + accelZ * accelZ);
 
             terminal::clear(false);
-            logger.info() << fmt::format( 
+            logger.info() << std::format( 
                 "accelX: {:.1f}\n"
                 "accelY: {:.1f}\n"
                 "accelZ: {:.1f}\n"
@@ -114,7 +114,7 @@ public:
             const auto rotZ = g->rotZ();
 
             terminal::clear(false);
-            logger.info() << fmt::format( 
+            logger.info() << std::format( 
                 "rotX: {:.1f}\n"
                 "rotY: {:.1f}\n"
                 "rotZ: {:.1f}",
@@ -124,7 +124,7 @@ public:
 
             break;
         }
-        default: throw std::logic_error(fmt::format("Unexcepted gyro mode: {}", to_underlying(mode)));
+        default: throw std::logic_error(std::format("Unexcepted gyro mode: {}", to_underlying(mode)));
         }
 
         std::this_thread::sleep_for(period.ns());

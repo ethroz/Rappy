@@ -14,8 +14,6 @@
 
 #include "Color.hpp"
 
-using namespace boost;
-
 namespace light {
 
 enum class LightName : uint8_t {
@@ -25,7 +23,7 @@ enum class LightName : uint8_t {
 
 class Light {
 public:
-    static Light create(const json::object& cfg);
+    static Light create(const boost::json::object& cfg);
 
     void color(const Color& col);
     Color color() const { return m_color; }

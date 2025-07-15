@@ -5,8 +5,6 @@
 
 #include <boost/json.hpp>
 
-using namespace boost;
-
 namespace pi {
 
 using Consumer = std::function<void(float)>;
@@ -15,7 +13,7 @@ class Output {
 public:
     virtual ~Output() {}
 
-    static std::unique_ptr<Output> create(const json::object& cfg);
+    static std::unique_ptr<Output> create(const boost::json::object& cfg);
 
     virtual Consumer getConsumer(std::string_view key) = 0;
 

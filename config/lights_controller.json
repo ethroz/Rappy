@@ -28,7 +28,7 @@
             "output": "rgb.period"
         },
         {
-            "input": "controller.square",
+            "input": "controller.lt",
             "output": "dual.brightness"
         }
     ]

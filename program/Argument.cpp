@@ -1,11 +1,12 @@
 #include <cassert>
 #include <charconv>
+#include <format>
 #include <stdexcept>
 #include <vector>
-#include <fmt/format.h>
 
 #include "light/Color.hpp"
 #include "utils/Duration.hpp"
+#include "utils/Other.hpp"
 
 #include "Argument.hpp"
 
@@ -53,15 +54,15 @@ bool Argument::get(ArgPtr& argPtr, const ArgPtr end) const {
 }
 
 std::string Argument::format() const {
-    const auto suffix = m_format.empty() ? std::string() : fmt::format(" {}", m_format);
+    const auto suffix = m_format.empty() ? std::string() : std::format(" {}", m_format);
     if (m_position != NPOS) {
-        return fmt::format("<{}{}>", m_tag, suffix);
+        return std::format("<{}{}>", m_tag, suffix);
     }
     else if (m_required) {
-        return fmt::format("<--{}{}>", m_tag, suffix);
+        return std::format("<--{}{}>", m_tag, suffix);
     }
     else {
-        return fmt::format("[--{}{}]", m_tag, suffix);
+        return std::format("[--{}{}]", m_tag, suffix);
     }
 }
 
@@ -85,7 +86,7 @@ Argument::Argument(int& ref, std::string_view tag, std::string_view explanation,
             if (argPtr == end) {
                 return false;
             }
-            ref = std::stoi(argPtr->data());
+            ref = to<int>(*argPtr);
             argPtr++;
             return true;
         })
@@ -99,7 +100,7 @@ Argument::Argument(float& ref, std::string_view tag, std::string_view explanatio
             if (argPtr == end) {
                 return false;
             }
-            ref = std::stof(argPtr->data());
+            ref = to<float>(*argPtr);
             argPtr++;
             return true;
         })

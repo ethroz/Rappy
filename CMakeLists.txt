@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.16)
 project(Rappy VERSION 1.0.0 LANGUAGES CXX)
 
 # Set the C++ standard
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Compiler options
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb3")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
@@ -21,7 +21,7 @@ list(FILTER HEADERS EXCLUDE REGEX "build/.*")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Define libraries to link with
-set(LIBS -lpthread -lpigpio -lrt -lbluetooth -lfmt)
+set(LIBS -lpthread -lpigpio -lrt -lbluetooth)
 
 # Include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

@@ -5,8 +5,8 @@
 #include <vector>
 #include <dirent.h>
 
-#include "servo/Controller.hpp"
-#include "servo/Motor.hpp"
+#include "motor/Controller.hpp"
+#include "motor/Motor.hpp"
 #include "utils/Timer.hpp"
 #include "utils/Logger.hpp"
 

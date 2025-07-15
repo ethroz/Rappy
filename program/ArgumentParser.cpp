@@ -1,7 +1,7 @@
 #include <cassert>
+#include <format>
 #include <stdexcept>
 #include <vector>
-#include <fmt/format.h>
 
 #include "ArgumentParser.hpp"
 
@@ -36,7 +36,7 @@ namespace program {
 //            for (size_t j = 1; j < arg.size(); j++) {
 //                std::string argJ = arg.substr(j,1);
 //                if (map.contains(argJ)) {
-//                    throw std::invalid_argument(fmt::format("Cannot specify the same flag more than once: {}", arg));
+//                    throw std::invalid_argument(std::format("Cannot specify the same flag more than once: {}", arg));
 //                }
 //                map[std::move(argJ)] = "";
 //            }
@@ -51,7 +51,7 @@ namespace program {
 //
 //    addOld();
 //    if (!value.empty()) {
-//        throw std::invalid_argument(fmt::format("Unexpected argument: {}", value));
+//        throw std::invalid_argument(std::format("Unexpected argument: {}", value));
 //    }
 //
 //    return map;
@@ -87,21 +87,21 @@ void ArgumentParser::parse(int argc, char* argv[]) const {
             }
         }
         if (!found) {
-            throw std::invalid_argument(fmt::format("Unrecognized argument: {}", *argPtr));
+            throw std::invalid_argument(std::format("Unrecognized argument: {}", *argPtr));
         }
     }
 
     // Check if we missed any positional arguments.
     for (size_t i = 0; i < m_posArgs.size(); i++) {
         if (!posPassed[i]) {
-            throw std::invalid_argument(fmt::format("Missing {} at argument {}", m_posArgs[i].tag(), m_posArgs[i].position()));
+            throw std::invalid_argument(std::format("Missing {} at argument {}", m_posArgs[i].tag(), m_posArgs[i].position()));
         }
     }
 
     // Check if we missed any required arguments.
     for (size_t i = 0; i < m_args.size(); i++) {
         if (m_args[i].required() && !passed[i]) {
-            throw std::invalid_argument(fmt::format("Missing requried argument: {}", m_args[i].tag()));
+            throw std::invalid_argument(std::format("Missing requried argument: {}", m_args[i].tag()));
         }
     }
 }

@@ -1,8 +1,8 @@
 #include <algorithm>
+#include <format>
 #include <stdexcept>
 #include <string>
 #include <pigpio.h>
-#include <fmt/format.h>
 
 #include "utils/Logger.hpp"
 #include "utils/Other.hpp"
@@ -95,7 +95,7 @@ std::unique_ptr<Pin> Pin::create(const PinConfig& config) {
     case PinMode::PWM:   return std::make_unique<PwmPin>   (config);
     case PinMode::SERVO: return std::make_unique<ServoPin> (config);
     case PinMode::IN:    return std::make_unique<InputPin> (config);
-    default: throw std::logic_error(fmt::format("Unexpected pin mode: {}", to_underlying(config.mode)));
+    default: throw std::logic_error(std::format("Unexpected pin mode: {}", to_underlying(config.mode)));
     }
 }
 

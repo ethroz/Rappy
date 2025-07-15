@@ -1,11 +1,11 @@
 #include <cerrno>
 #include <csignal>
 #include <cstdlib>
+#include <format>
 #include <iostream>
 #include <stack>
 #include <system_error>
 #include <type_traits>
-#include <fmt/format.h>
 #include <poll.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -50,7 +50,7 @@ Process::Process(std::string_view command) : m_command(command), m_argumentConta
     }
 
     if (!cStack.empty()) {
-        throw std::invalid_argument(fmt::format("Bad command format: {}", m_command));
+        throw std::invalid_argument(std::format("Bad command format: {}", m_command));
     }
 
     // Split the command into its arguments.
@@ -143,7 +143,7 @@ int Process::stop() {
     m_pid = -1;
 
     if (status == FAIL_CODE) {
-        throw std::invalid_argument(fmt::format("Failed to execute command: {}", m_command));
+        throw std::invalid_argument(std::format("Failed to execute command: {}", m_command));
     }
 
     return status;

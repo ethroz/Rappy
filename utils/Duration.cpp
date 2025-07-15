@@ -1,6 +1,8 @@
+#include <format>
 #include <stdexcept>
 #include <string>
-#include <fmt/format.h>
+
+#include "Other.hpp"
 
 #include "Duration.hpp"
 
@@ -34,10 +36,10 @@ void Duration::set(std::string_view str) {
         }
     }
     else {
-        throw std::invalid_argument(fmt::format("Unrecognized time: {}", str));
+        throw std::invalid_argument(std::format("Unrecognized time: {}", str));
     }
 
-    const auto time = std::stof(std::string(str));
+    const auto time = to<float>(str);
     set(time * scale);
 }
 

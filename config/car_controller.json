@@ -1,0 +1,30 @@
+{
+    "inputs": {
+        "controller": {
+            "type": "controller",
+            "id": "js0"
+        }
+    },
+    "outputs": {
+        "left": {
+            "type": "motor",
+            "name": "L298N",
+            "pins": [10, 11]
+        },
+        "right": {
+            "type": "motor",
+            "name": "L298N",
+            "pins": [12, 13]
+        }
+    },
+    "connections": [
+        {
+            "input": "controller.ljoy.x",
+            "output": "left.value"
+        },
+        {
+            "input": "controller.rjoy.x",
+            "output": "right.value"
+        }
+    ]
+}

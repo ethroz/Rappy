@@ -1,21 +1,42 @@
 #pragma once
 
+#include <exception>
+#include <format>
 #include <vector>
 
 #include <boost/json.hpp>
 
-#include <fmt/format.h>
 
 #include "utils/Duration.hpp"
 
-using namespace boost;
+#include <cxxabi.h>
 
-json::value parse(std::string_view json);
+boost::json::value parse(std::string_view json);
 
 template<typename T>
-T getAsOr(const json::object& obj, std::string_view key, T dflt) {
+T getAsOr(const boost::json::value& val, const T& dflt) {
+    try {
+        return boost::json::value_to<const T&>(val);
+    }
+    catch (const std::exception& e) {
+        return dflt;
+    }
+}
+
+template<typename T>
+T getAsOrThrow(const boost::json::value& val, std::string_view prefix) {
+    try {
+        return boost::json::value_to<T>(val);
+    }
+    catch (const std::exception& e) {
+        throw std::invalid_argument(std::format("{}: expected a {}", prefix, typeid(T).name()));
+    }
+}
+
+template<typename T>
+T getAsOr(const boost::json::object& obj, std::string_view key, const T& dflt) {
     if (auto* v = obj.if_contains(key)) {
-        return json::value_to<T>(*v);
+        return boost::json::value_to<T>(*v);
     }
     else {
         return dflt;
@@ -23,49 +44,41 @@ T getAsOr(const json::object& obj, std::string_view key, T dflt) {
 }
 
 template<typename T>
-T getAsOrThrow(const json::object& obj, std::string_view key, std::string_view prefix) {
+T getAsOrThrow(const boost::json::object& obj, std::string_view key, std::string_view prefix) {
     if (auto* v = obj.if_contains(key)) {
-        return json::value_to<T>(*v);
+        return boost::json::value_to<T>(*v);
     }
     else {
-        throw std::invalid_argument(fmt::format("{}: Missing \"{}\" key", prefix, key));
+        throw std::invalid_argument(std::format("{}: Missing \"{}\" key", prefix, key));
     }
 }
 
 template<typename T>
-std::vector<T> getAsVecOr(const json::object& obj, std::string_view key, T dflt) {
+std::vector<T> getAsVecOr(const boost::json::object& obj, std::string_view key, const std::vector<T>& dflt) {
     if (auto* v = obj.if_contains(key)) {
         if (v->is_array()) {
-            return json::value_to<std::vector<T>>(*v);
+            return boost::json::value_to<std::vector<T>>(*v);
         }
     }
     return dflt;
 }
 
 template<typename T>
-std::vector<T> getAsVecOrThrow(const json::object& obj, std::string_view key, std::string_view prefix) {
+std::vector<T> getAsVecOrThrow(const boost::json::object& obj, std::string_view key, std::string_view prefix) {
     if (auto* v = obj.if_contains(key)) {
         if (v->is_array()) {
-            return json::value_to<std::vector<T>>(*v);
+            return boost::json::value_to<std::vector<T>>(*v);
         }
         else {
-            throw std::invalid_argument(fmt::format("{}: \"{}\" is not an array", prefix, key));
+            throw std::invalid_argument(std::format("{}: \"{}\" is not an array", prefix, key));
         }
     }
     else {
-        throw std::invalid_argument(fmt::format("{}: Missing \"{}\" key", prefix, key));
+        throw std::invalid_argument(std::format("{}: Missing \"{}\" key", prefix, key));
     }
 }
 
-std::string_view getAsStringViewOr(const json::object& obj, std::string_view key, std::string_view dflt);
-std::string_view getAsStringViewOrThrow(const json::object& obj, std::string_view key, std::string_view prefix);
-float getAsFloatOr(const json::object& obj, std::string_view key, float dflt);
-float getAsFloatOrThrow(const json::object& obj, std::string_view key, std::string_view prefix);
-int getAsIntOr(const json::object& obj, std::string_view key, int dflt);
-int getAsIntOrThrow(const json::object& obj, std::string_view key, std::string_view prefix);
-bool getAsBoolOr(const json::object& obj, std::string_view key, bool dflt);
-bool getAsBoolOrThrow(const json::object& obj, std::string_view key, std::string_view prefix);
-Duration getAsDurationOr(const json::object& obj, std::string_view key, Duration dflt);
-Duration getAsDurationOrThrow(const json::object& obj, std::string_view key, std::string_view prefix);
-const json::object& getAsObjectOrThrow(const json::value& val, std::string_view prefix);
-const json::array& getAsArrayOrThrow(const json::value& val, std::string_view prefix);
+Duration getAsDurationOr(const boost::json::object& obj, std::string_view key, Duration dflt);
+Duration getAsDurationOrThrow(const boost::json::object& obj, std::string_view key, std::string_view prefix);
+const boost::json::object& getAsObjectOrThrow(const boost::json::value& val, std::string_view prefix);
+const boost::json::array& getAsArrayOrThrow(const boost::json::value& val, std::string_view prefix);

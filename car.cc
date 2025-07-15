@@ -1,16 +1,16 @@
 #include <chrono>
 #include <cstdint>
+#include <format>
 #include <map>
 #include <memory>
 #include <string_view>
 #include <thread>
 #include <vector>
-#include <fmt/format.h>
 
 #include "device/Device.hpp"
 #include "device/ControllerState.hpp"
 #include "program/Argument.hpp"
-#include "servo/Motor.hpp"
+#include "motor/Motor.hpp"
 #include "utils/Duration.hpp"
 #include "utils/Other.hpp"
 #include "utils/Terminal.hpp"
@@ -19,7 +19,7 @@
 
 using namespace program;
 using namespace device;
-using namespace servo;
+using namespace motor;
 using namespace std::literals;
 
 using ControlMapFunc = std::function<float(const ControllerState& state)>;
@@ -40,7 +40,7 @@ ControlMapFunc mappingFromString(std::string_view bind) {
 
     const auto& it = CONTROL_MAP.find(bindStr);
     if (it == CONTROL_MAP.end()) {
-        throw std::invalid_argument(fmt::format("Unrecognized controller binding: {}", bindStr));
+        throw std::invalid_argument(std::format("Unrecognized controller binding: {}", bindStr));
     }
 
     return it->second;
@@ -76,8 +76,8 @@ public:
             "\"\" #... \"\"");
         parser.addOptional(period, "period", "The period between device updates.");
 
-        examples.push_back(fmt::format("{} js0 --control L298N 10 11 XL --control L298N 12 13 XR", prgmName));
-        examples.push_back(fmt::format("{} js0 --control L298N 10 11 XL --period 1ms", prgmName));
+        examples.push_back(std::format("{} js0 --control L298N 10 11 XL --control L298N 12 13 XR", prgmName));
+        examples.push_back(std::format("{} js0 --control L298N 10 11 XL --period 1ms", prgmName));
     }
 
     void init() override {

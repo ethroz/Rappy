@@ -1,0 +1,9 @@
+{
+    "outputs": {
+        "motor": {
+            "type": "motor",
+            "name": "micro",
+            "pin": 22
+        }
+    }
+}

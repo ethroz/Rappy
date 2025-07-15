@@ -1,7 +1,7 @@
+#include <format>
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include <fmt/format.h>
 
 #include "bluetooth/Device.hpp"
 
@@ -17,9 +17,9 @@ public:
         parser.addOptional(address, "address", "The address of the bluetooth device");
         parser.addOptional(timeout, "timeout", "The number of seconds for each scan for devices");
 
-        examples.push_back(fmt::format("{} --name \"Wireless Controller\"", prgmName));
-        examples.push_back(fmt::format("{} --address 12:34:56:78:90:AB", prgmName));
-        examples.push_back(fmt::format("{} --name \"Wireless Controller\" --timeout 5", prgmName));
+        examples.push_back(std::format("{} --name \"Wireless Controller\"", prgmName));
+        examples.push_back(std::format("{} --address 12:34:56:78:90:AB", prgmName));
+        examples.push_back(std::format("{} --name \"Wireless Controller\" --timeout 5", prgmName));
     }
 
     void init() override {

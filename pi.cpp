@@ -1,4 +1,5 @@
 #include <chrono>
+#include <format>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -7,8 +8,7 @@
 #include <string_view>
 #include <thread>
 
-#include <fmt/format.h>
-
+#include "pi/Connection.hpp"
 #include "pi/Input.hpp"
 #include "pi/Output.hpp"
 #include "utils/Duration.hpp"
@@ -20,30 +20,14 @@
 
 using namespace program;
 using namespace pi;
-using namespace boost;
 using namespace std::literals;
-
-std::string documentation =
-R"(
-Json file documentation:
-An object of named devices. Example:
-"alias": {
-    "type": "light",
-    "name": "rgb",
-    "mode": "cycle",
-    "pins": [0,1,2],
-    "pin-mode": "pwm",
-    "period": "5s",
-    "brightness": 0.5
-})";
 
 class Prgm : public Base {
 public:
     Prgm(std::string_view nm) : Base(nm) {
         parser.addPositional(path, "path", "The path to the json file.");
 
-        examples.push_back(fmt::format("{} config.json", prgmName));
-        examples.push_back(documentation);
+        examples.push_back(std::format("{} config.json", prgmName));
     }
 
     void init() override {
@@ -73,38 +57,7 @@ public:
             const auto& connectCfg = getAsArrayOrThrow(*v, "Prgm::init()");
             for (const auto& config : connectCfg) {
                 const auto& cfg = getAsObjectOrThrow(config, "Prgm::init()");
-
-                const auto inputStr = getAsStringViewOrThrow(cfg, "input", "Prgm::init()");
-                const auto outputStr = getAsStringViewOrThrow(cfg, "output", "Prgm::init()");
-
-                const auto inputPeriod = inputStr.find('.');
-                const auto outputPeriod = outputStr.find('.');
-                if (inputPeriod == std::string_view::npos || outputPeriod == std::string_view::npos) {
-                    throw std::invalid_argument("Connections must contain at least one period");
-                }
-
-                const auto input = inputStr.substr(0, inputPeriod);
-                const auto output = outputStr.substr(0, outputPeriod);
-
-                if (!inputs.contains(input)) {
-                    throw std::invalid_argument(fmt::format("Invalid input: {}", input));
-                }
-                if (!outputs.contains(output)) {
-                    throw std::invalid_argument(fmt::format("Invalid output: {}", output));
-                }
-
-                const auto inputKey = inputStr.substr(inputPeriod + 1);
-                const auto outputKey = outputStr.substr(outputPeriod + 1);
-
-                auto producer = inputs[input]->getProducer(inputKey);
-                auto consumer = outputs[output]->getConsumer(outputKey);
-
-                logger.debug() << "Prgm::init(): Adding connection: " << inputStr << " > " << outputStr;
-
-                connections.emplace_back(
-                    [producer = std::move(producer), consumer = std::move(consumer)]() {
-                        consumer(producer());
-                    });
+                connections.emplace_back(pi::parseConnection(cfg, inputs, outputs));
             }
         }
 
@@ -149,7 +102,7 @@ public:
 
 private:
     std::string path;
-    json::value json;
+    boost::json::value json;
     Duration period = 10ms;
     std::map<std::string_view, std::unique_ptr<Input>> inputs;
     std::vector<std::function<void()>> connections;

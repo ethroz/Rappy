@@ -1,8 +1,8 @@
 #include <algorithm>
 #include <cmath>
+#include <format>
 #include <map>
 #include <stdexcept>
-#include <fmt/format.h>
 
 #include "utils/Other.hpp"
 
@@ -39,7 +39,7 @@ Color Color::fromHsv(float hue, float saturation, float value) {
     case 3: col = {0.0f, temp, chroma}; break;
     case 4: col = {temp, 0.0f, chroma}; break;
     case 5: col = {chroma, 0.0f, temp}; break;
-    default: throw std::logic_error(fmt::format("Expected hue to be in the range [0, 360): {}", hue));
+    default: throw std::logic_error(std::format("Expected hue to be in the range [0, 360): {}", hue));
     }
     return col + offset;
 }

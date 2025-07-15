@@ -6,17 +6,15 @@
 
 #include <boost/json.hpp>
 
-using namespace boost;
-
 namespace pi {
 
-using Producer = std::function<float(void)>;
+using Producer = std::function<float()>;
 
 class Input {
 public:
     virtual ~Input() {}
 
-    static std::unique_ptr<Input> create(const json::object& cfg);
+    static std::unique_ptr<Input> create(const boost::json::object& cfg);
 
     virtual void poll() = 0;
 

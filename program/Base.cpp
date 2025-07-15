@@ -1,8 +1,8 @@
 #include <csignal>
+#include <format>
 #include <iostream>
 #include <span>
 #include <stdexcept>
-#include <fmt/format.h>
 
 #include "utils/Other.hpp"
 
@@ -46,7 +46,7 @@ int Base::run(int argc, char* argv[]) noexcept {
     }
     catch (const std::exception& e) {
         if (!m_help && argc > 1) {
-            logger.error() << fmt::format("Initialization error:\n\n    {}\n", e.what());
+            logger.error() << std::format("Initialization error:\n\n    {}\n", e.what());
         }
         help();
         return 1;
@@ -87,7 +87,7 @@ void Base::help() const noexcept {
         logger.info() << message;
     }
     catch (const std::exception& e) {
-        logger.error() << fmt::format("Base::help(): Failed to generate help message: {}", e.what());
+        logger.error() << std::format("Base::help(): Failed to generate help message: {}", e.what());
     }
 }
 

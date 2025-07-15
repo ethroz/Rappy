@@ -1,0 +1,30 @@
+{
+    "inputs": {
+        "controller": {
+            "type": "controller",
+            "id": "js0"
+        }
+    },
+    "outputs": {
+        "micro": {
+            "type": "motor",
+            "name": "micro",
+            "pin": 15
+        },
+        "fitec": {
+            "type": "motor",
+            "name": "fitec",
+            "pin": 21
+        }
+    },
+    "connections": [
+        {
+            "input": "controller.rjoy.x",
+            "output": "fitec.value"
+        },
+        {
+            "input": "controller.ljoy.x",
+            "output": "micro.value"
+        }
+    ]
+}

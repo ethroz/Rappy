@@ -18,8 +18,10 @@ all:
 # Clean rule.
 .ONESHELL:
 clean:
+	@rm -rf build
+	@mkdir -p build
 	@cd build
-	$(MAKE) clean
+	@cmake ..
 
 # Debug rule
 .ONESHELL:

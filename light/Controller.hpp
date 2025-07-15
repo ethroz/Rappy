@@ -12,15 +12,13 @@
 #include "Color.hpp"
 #include "Light.hpp"
 
-using namespace boost;
-
 namespace light {
 
 class Controller : public pi::Output {
 public:
     virtual ~Controller() {}
 
-    static std::unique_ptr<Controller> create(const json::object& cfg, Light&& light);
+    static std::unique_ptr<Controller> create(const boost::json::object& cfg, Light&& light);
 
     virtual Color color() { return m_light.color(); }
 

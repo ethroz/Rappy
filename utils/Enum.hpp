@@ -2,27 +2,32 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <format>
 #include <map>
 #include <stdexcept>
 #include <string_view>
 
-#include <fmt/format.h>
-
 #include "Other.hpp"
 
 #define CREATE_ENUM(EnumName, ...) \
-enum class EnumName : uint8_t { __VA_ARGS__ }; \
+enum class EnumName : uint8_t { __VA_ARGS__ };
+
+#define CREATE_ENUM_FROM_STRING(EnumName, ...) \
 static const std::map<std::string_view, EnumName> EnumName##_MAP = { \
     PAIR_LIST(EnumName, __VA_ARGS__) \
 }; \
-EnumName EnumName##FromString(std::string_view mode) { \
+EnumName EnumName##FromString(const std::string_view mode) { \
     const auto modeStr = toupper(mode); \
     const auto it = EnumName##_MAP.find(modeStr); \
     if (it == EnumName##_MAP.end()) { \
-        throw std::invalid_argument(fmt::format("Unrecognized control mode: {}", modeStr)); \
+        throw std::invalid_argument(std::format("Unrecognized control mode: {}", modeStr)); \
     } \
     return it->second; \
 }
+
+#define CREATE_ENUM_SET(EnumName, ...) \
+CREATE_ENUM(EnumName, __VA_ARGS__) \
+CREATE_ENUM_FROM_STRING(EnumName, __VA_ARGS__)
 
 #define PARENS ()
 
@@ -44,3 +49,4 @@ EnumName EnumName##FromString(std::string_view mode) { \
 
 // Example usage:
 // CREATE_ENUM(ControlMode, SOLID, CYCLE, FLASH)
+// CREATE_ENUM_FROM_STRING(ControlMode, SOLID, CYCLE, FLASH)

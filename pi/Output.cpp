@@ -1,7 +1,6 @@
+#include <format>
 #include <map>
 #include <stdexcept>
-
-#include <fmt/format.h>
 
 #include "light/Controller.hpp"
 #include "light/Light.hpp"
@@ -11,39 +10,26 @@
 
 #include "Output.hpp"
 
-using namespace light;
-
 namespace pi {
 
-enum class OutputType : uint8_t {
-    LIGHT
-};
+CREATE_ENUM_SET(OutputType, LIGHT, MOTOR)
 
-static const std::map<std::string_view, OutputType> TYPE_MAP = {
-    {"light", OutputType::LIGHT}
-};
-
-OutputType outputTypeFromString(std::string_view mode) {
-    const auto typeStr = tolower(mode);
-
-    const auto it = TYPE_MAP.find(typeStr);
-    if (it == TYPE_MAP.end()) {
-        throw std::invalid_argument(fmt::format("Unrecognized type: {}", typeStr));
-    }
-
-    return it->second;
-}
-
-std::unique_ptr<Output> Output::create(const json::object& cfg) {
-    const auto typeStr = getAsStringViewOrThrow(cfg, "type", "pi::Output::create()");
-    const auto type = outputTypeFromString(typeStr);
+std::unique_ptr<Output> Output::create(const boost::json::object& cfg) {
+    const auto typeStr = getAsOrThrow<std::string_view>(cfg, "type", "pi::Output::create()");
+    const auto type = OutputTypeFromString(typeStr);
     logger.debug() << "pi::Output::create(): Adding " << typeStr;
     switch (type) {
     case OutputType::LIGHT: {
+        using namespace light;
         auto light = Light::create(cfg);
         return Controller::create(cfg, std::move(light));
     }
-    default: throw std::invalid_argument(fmt::format("Unrecognized Output type: {}", typeStr));
+    case OutputType::MOTOR: {
+        using namespace motor;
+        auto motor = Motor::create(cfg);
+        return Controller::create(cfg, std::move(motor));
+    }
+    default: throw std::invalid_argument(std::format("Unrecognized Output type: {}", typeStr));
     }
 }
 

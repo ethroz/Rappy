@@ -1,7 +1,6 @@
 #include <cmath>
+#include <format>
 #include <stdexcept>
-
-#include <fmt/format.h>
 
 #include "utils/Duration.hpp"
 #include "utils/Enum.hpp"
@@ -13,12 +12,12 @@
 
 namespace light {
 
-CREATE_ENUM(ControlMode, SOLID, CYCLE, FLASH)
+CREATE_ENUM_SET(ControlMode, SOLID, CYCLE, FLASH)
 
-std::unique_ptr<Controller> Controller::create(const json::object& cfg, Light&& light) {
-    const auto mode = ControlModeFromString(getAsStringViewOrThrow(cfg, "mode", "light::Controller::create()"));
-    const auto color = Color::fromString(getAsStringViewOr(cfg, "color", "white"));
-    const auto brightness = getAsFloatOr(cfg, "brightness", 1.0f);
+std::unique_ptr<Controller> Controller::create(const boost::json::object& cfg, Light&& light) {
+    const auto mode = ControlModeFromString(getAsOrThrow<std::string_view>(cfg, "mode", "light::Controller::create()"));
+    const auto color = Color::fromString(getAsOr<std::string_view>(cfg, "color", "white"));
+    const auto brightness = getAsOr<float>(cfg, "brightness", 1.0f);
     const auto period = getAsDurationOr(cfg, "period", 1.0f).get();
 
     if (mode != ControlMode::CYCLE && light.name() == LightName::DUAL_COLOR_LED && color.B > 0.0f) {
@@ -29,11 +28,11 @@ std::unique_ptr<Controller> Controller::create(const json::object& cfg, Light&& 
     case ControlMode::SOLID: return std::make_unique<SolidLight>(std::move(light), color, brightness);
     case ControlMode::CYCLE: return std::make_unique<LightCycle>(std::move(light), brightness, period);
     case ControlMode::FLASH: return std::make_unique<FlashingLight>(std::move(light), color, brightness, period);
-    default: throw std::invalid_argument(fmt::format("light::Controller::create(): Invalid control mode: {}", to_underlying(mode)));
+    default: throw std::invalid_argument(std::format("light::Controller::create(): Invalid control mode: {}", to_underlying(mode)));
     }
 }
 
-CREATE_ENUM(LightControl, COLOR, BRIGHTNESS, PERIOD)
+CREATE_ENUM_SET(LightControl, COLOR, BRIGHTNESS, PERIOD)
 
 pi::Consumer SolidLight::getConsumer(std::string_view key) {
     const auto control = LightControlFromString(key.substr(0, key.find('.')));
@@ -45,18 +44,18 @@ pi::Consumer SolidLight::getConsumer(std::string_view key) {
         else {
             const auto channel = key.substr(key.find('.') + 1);
             if (channel.size() != 1) {
-                throw std::invalid_argument(fmt::format("Unrecognized color channel: {}", channel));
+                throw std::invalid_argument(std::format("Unrecognized color channel: {}", channel));
             }
             switch (std::tolower(channel[0])) {
             case 'r': return [this](float value) { m_color.R = value; };
             case 'g': return [this](float value) { m_color.G = value; };
             case 'b': return [this](float value) { m_color.B = value; };
-            default: throw std::invalid_argument(fmt::format("Unrecognized color channel: {}", channel));
+            default: throw std::invalid_argument(std::format("Unrecognized color channel: {}", channel));
             }
         }
     }
     case LightControl::BRIGHTNESS: return [this](float value) { m_brightness = value; };
-    default: throw std::invalid_argument(fmt::format("Unrecognized light control: {}", key));
+    default: throw std::invalid_argument(std::format("Unrecognized light control: {}", key));
     }
 }
 
@@ -65,7 +64,7 @@ pi::Consumer LightCycle::getConsumer(std::string_view key) {
     switch (control) {
     case LightControl::BRIGHTNESS: return [this](float value) { m_brightness = value; };
     case LightControl::PERIOD: return [this](float value) { m_period = value; };
-    default: throw std::invalid_argument(fmt::format("Unrecognized light control: {}", key));
+    default: throw std::invalid_argument(std::format("Unrecognized light control: {}", key));
     }
 }
 
@@ -79,19 +78,19 @@ pi::Consumer FlashingLight::getConsumer(std::string_view key) {
         else {
             const auto channel = key.substr(key.find('.') + 1);
             if (channel.size() != 1) {
-                throw std::invalid_argument(fmt::format("Unrecognized color channel: {}", channel));
+                throw std::invalid_argument(std::format("Unrecognized color channel: {}", channel));
             }
             switch (std::tolower(channel[0])) {
             case 'r': return [this](float value) { m_color.R = value; };
             case 'g': return [this](float value) { m_color.G = value; };
             case 'b': return [this](float value) { m_color.B = value; };
-            default: throw std::invalid_argument(fmt::format("Unrecognized color channel: {}", channel));
+            default: throw std::invalid_argument(std::format("Unrecognized color channel: {}", channel));
             }
         }
     }
     case LightControl::BRIGHTNESS: return [this](float value) { m_brightness = value; };
     case LightControl::PERIOD: return [this](float value) { m_period = value; };
-    default: throw std::invalid_argument(fmt::format("Unrecognized light control: {}", key));
+    default: throw std::invalid_argument(std::format("Unrecognized light control: {}", key));
     }
 }
 

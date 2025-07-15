@@ -1,11 +1,10 @@
 #include <cstdint>
+#include <format>
 #include <limits>
 #include <type_traits>
 
 #include <fcntl.h>
 #include <unistd.h>
-
-#include <fmt/format.h>
 
 #include "utils/Enum.hpp"
 #include "utils/Other.hpp"
@@ -18,7 +17,7 @@ namespace device {
 
 Controller::Controller(std::string_view id) : 
     pi::Input(id),
-    m_socket(open(fmt::format("/dev/input/{}", id).c_str(), O_RDONLY))
+    m_socket(open(std::format("/dev/input/{}", id).c_str(), O_RDONLY))
 {}
 
 enum ControllerEventType : uint8_t {
@@ -108,7 +107,7 @@ void Controller::poll() {
             case PS:           button = &m_state.playstationButton; break;
             case LEFT_STICK:   button = &m_state.leftStick; break;
             case RIGHT_STICK:  button = &m_state.rightStick; break;
-            default: throw std::logic_error(fmt::format("Unknown controller button id: {}", event.id()));
+            default: throw std::logic_error(std::format("Unknown controller button id: {}", event.id()));
             }
             
             if (button != nullptr) {
@@ -116,7 +115,7 @@ void Controller::poll() {
                 switch (event.data()) {
                 case PRESSED:  pressed = true; break;
                 case RELEASED: pressed = false; break;
-                default: throw std::logic_error(fmt::format("Unknown controller data"));
+                default: throw std::logic_error(std::format("Unknown controller data"));
                 }
                 button->pressed = pressed;
             }
@@ -160,17 +159,17 @@ void Controller::poll() {
                 m_state.directionalPad = Direction(dir | (m_state.directionalPad & (LEFT | RIGHT)));
                 break;
             }
-            default: throw std::logic_error(fmt::format("Unknown controller axis id: {}", event.id()));
+            default: throw std::logic_error(std::format("Unknown controller axis id: {}", event.id()));
             }
             break;
         }
-        default: throw std::logic_error(fmt::format("Unknown controller event type: {}", event.type()));
+        default: throw std::logic_error(std::format("Unknown controller event type: {}", event.type()));
         }
     }
 }
 
-CREATE_ENUM(ControllerBind, X, CIRCLE, TRIANGLE, SQUARE, LB, RB, SHARE, OPTIONS, PS, LSTICK, RSTICK, LRT, LT, RT, LJOY, RJOY, DPAD)
-CREATE_ENUM(ControllerJoy, X, Y, LEFT, UP, RIGHT, DOWN)
+CREATE_ENUM_SET(ControllerBind, X, CIRCLE, TRIANGLE, SQUARE, LB, RB, SHARE, OPTIONS, PS, LSTICK, RSTICK, LT, RT, LJOY, RJOY, DPAD)
+CREATE_ENUM_SET(ControllerJoy, X, Y, LEFT, UP, RIGHT, DOWN)
 
 pi::Producer Controller::getProducer(std::string_view key) const {
     const auto period = key.find('.');
@@ -196,11 +195,6 @@ pi::Producer Controller::getProducer(std::string_view key) const {
     // Handle all the buttons.
     if (button != nullptr) {
         return [button]() { return button->pressed ? 1.0f : 0.0f; };
-    }
-
-    // Handle the left and right trigger case.
-    if (bind == ControllerBind::LRT) {
-        return [this]() { return normalize(Axis(m_state.rightTrigger / 2) - Axis(m_state.leftTrigger / 2)); };
     }
 
     const uAxis* axis = nullptr;
@@ -237,7 +231,7 @@ pi::Producer Controller::getProducer(std::string_view key) const {
         case ControllerJoy::UP:    return [axes]() { return normalize(axes[1] > 0 ?  axes[1] : Axis(0)); };
         case ControllerJoy::RIGHT: return [axes]() { return normalize(axes[0] > 0 ?  axes[0] : Axis(0)); };
         case ControllerJoy::DOWN:  return [axes]() { return normalize(axes[1] < 0 ? -axes[1] : Axis(0)); };
-        default: throw std::invalid_argument(fmt::format("Unrecognized controller joystick bind: {}", valueStr));
+        default: throw std::invalid_argument(std::format("Unrecognized controller joystick bind: {}", valueStr));
         }
     }
     // Handle the directional pad.
@@ -249,11 +243,11 @@ pi::Producer Controller::getProducer(std::string_view key) const {
         case ControllerJoy::UP:    return [this]() { return float((m_state.directionalPad & UP   ) > 0); };
         case ControllerJoy::RIGHT: return [this]() { return float((m_state.directionalPad & RIGHT) > 0); };
         case ControllerJoy::DOWN:  return [this]() { return float((m_state.directionalPad & DOWN ) > 0); };
-        default: throw std::invalid_argument(fmt::format("Unrecognized controller directional pad bind: {}", valueStr));
+        default: throw std::invalid_argument(std::format("Unrecognized controller directional pad bind: {}", valueStr));
         }
     }
     else {
-        throw std::invalid_argument(fmt::format("Unrecognized controller bind: {}", key));
+        throw std::invalid_argument(std::format("Unrecognized controller bind: {}", key));
     }
 }
 

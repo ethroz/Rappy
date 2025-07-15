@@ -1,8 +1,7 @@
+#include <format>
 #include <map>
 #include <stdexcept>
 #include <string_view>
-
-#include <fmt/format.h>
 
 #include "utils/Other.hpp"
 
@@ -23,7 +22,7 @@ PinMode modeFromString(std::string_view mode) {
 
     const auto it = MODE_MAP.find(modeStr);
     if (it == MODE_MAP.end()) {
-        throw std::invalid_argument(fmt::format("Unrecognized pin mode: {}", modeStr));
+        throw std::invalid_argument(std::format("Unrecognized pin mode: {}", modeStr));
     }
 
     return it->second;
@@ -59,7 +58,7 @@ int pinRemap(int pin) {
     case 25: return 18;
     case 26: return 15;
     case 27: return 14;
-    default: throw std::logic_error(fmt::format("Pin is out of range 0-27: {}", pin));
+    default: throw std::logic_error(std::format("Pin is out of range 0-27: {}", pin));
     }
 }
 

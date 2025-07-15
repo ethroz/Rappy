@@ -2,9 +2,9 @@
 #include <array>
 #include <chrono>
 #include <cmath>
+#include <format>
 #include <limits>
 #include <thread>
-#include <fmt/format.h>
 
 #include "utils/Logger.hpp"
 #include "utils/Other.hpp"
@@ -132,7 +132,7 @@ void Gyrometer::calibrate() {
             }
 
             terminal::clear(false);
-            logger.info() << fmt::format("Press enter to start calibrating Accel {}{}.", dirChar, axisChar);
+            logger.info() << std::format("Press enter to start calibrating Accel {}{}.", dirChar, axisChar);
             std::cin.get();
 
             while (true) {
@@ -142,7 +142,7 @@ void Gyrometer::calibrate() {
 
                 terminal::clear(false);
                 logger.info() <<
-                    fmt::format("Calibrating Accel {}{}", dirChar, axisChar) << "\n"
+                    std::format("Calibrating Accel {}{}", dirChar, axisChar) << "\n"
                     "accelX: " << readings[X] << "\n"
                     "accelY: " << readings[Y] << "\n"
                     "accelZ: " << readings[Z];
@@ -174,9 +174,9 @@ void Gyrometer::calibrate() {
     }
 
     logger.info() <<
-        fmt::format("accelX: [{}, {}]\n", m_accelAdj[X][DOWN], m_accelAdj[X][UP]) <<
-        fmt::format("accelY: [{}, {}]\n", m_accelAdj[Y][DOWN], m_accelAdj[Y][UP]) <<
-        fmt::format("accelZ: [{}, {}]",   m_accelAdj[Z][DOWN], m_accelAdj[Z][UP]);
+        std::format("accelX: [{}, {}]\n", m_accelAdj[X][DOWN], m_accelAdj[X][UP]) <<
+        std::format("accelY: [{}, {}]\n", m_accelAdj[Y][DOWN], m_accelAdj[Y][UP]) <<
+        std::format("accelZ: [{}, {}]",   m_accelAdj[Z][DOWN], m_accelAdj[Z][UP]);
 }
 
 void Gyrometer::selfTest() const {
@@ -237,9 +237,9 @@ void Gyrometer::selfTest() const {
     logger.info() << "Test complete!";
 
     logger.info() << "Test data: [min, avg, max]";
-    logger.info() << fmt::format("x: [{}, {}, {}]", minX, avgX, maxX);
-    logger.info() << fmt::format("y: [{}, {}, {}]", minY, avgY, maxY);
-    logger.info() << fmt::format("z: [{}, {}, {}]", minZ, avgZ, maxZ);
+    logger.info() << std::format("x: [{}, {}, {}]", minX, avgX, maxX);
+    logger.info() << std::format("y: [{}, {}, {}]", minY, avgY, maxY);
+    logger.info() << std::format("z: [{}, {}, {}]", minZ, avgZ, maxZ);
 
     maxX = min; minX = max; avgX = 0;
     maxY = min; minY = max; avgY = 0;
@@ -262,9 +262,9 @@ void Gyrometer::selfTest() const {
     avgZ /= size;
 
     logger.info() << "Real data:";
-    logger.info() << fmt::format("x: [{}, {}, {}]", minX, avgX, maxX);
-    logger.info() << fmt::format("y: [{}, {}, {}]", minY, avgY, maxY);
-    logger.info() << fmt::format("z: [{}, {}, {}]", minZ, avgZ, maxZ);
+    logger.info() << std::format("x: [{}, {}, {}]", minX, avgX, maxX);
+    logger.info() << std::format("y: [{}, {}, {}]", minY, avgY, maxY);
+    logger.info() << std::format("z: [{}, {}, {}]", minZ, avgZ, maxZ);
    
     const auto regXa = m_device.read<uint8_t>(0xD);
     const auto regYa = m_device.read<uint8_t>(0xE); 
@@ -275,7 +275,7 @@ void Gyrometer::selfTest() const {
     int16_t yaTest = ((regYa >> 3) & 0x1C) | ((regTest >> 2) & 0x3);
     int16_t zaTest = ((regZa >> 3) & 0x1C) | (regTest & 0x3);
 
-    logger.info() << fmt::format("test: [{}, {}, {}]", xaTest, yaTest, zaTest);
+    logger.info() << std::format("test: [{}, {}, {}]", xaTest, yaTest, zaTest);
 
     float ftXa = 0.0f;
     if (xaTest > 0) {
@@ -290,12 +290,12 @@ void Gyrometer::selfTest() const {
         ftZa = 4096.0f * 0.34f * powf(0.92f / 0.34f, (zaTest - 1.0f) / 30.0f);
     }
 
-    logger.info() << fmt::format("FT: [{}, {}, {}]", ftXa, ftYa, ftZa);
+    logger.info() << std::format("FT: [{}, {}, {}]", ftXa, ftYa, ftZa);
 
     const auto changeX = ((testAvgX - avgX) - ftXa) / ftXa;
     const auto changeY = ((testAvgY - avgY) - ftYa) / ftYa;
     const auto changeZ = ((testAvgZ - avgZ) - ftZa) / ftZa;
-    logger.info() << fmt::format("Change: [{}, {}, {}]", changeX, changeY, changeZ);
+    logger.info() << std::format("Change: [{}, {}, {}]", changeX, changeY, changeZ);
     
     logger.info() << "AccelX: " << (abs(changeX) <= 14.0f ? "pass" : "fail");
     logger.info() << "AccelY: " << (abs(changeY) <= 14.0f ? "pass" : "fail");

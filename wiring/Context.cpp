@@ -1,6 +1,5 @@
+#include <format>
 #include <stdexcept>
-
-#include <fmt/format.h>
 
 #include <pigpio.h>
 
@@ -17,7 +16,7 @@ std::atomic<Context::PinFlag> Context::s_usedPins = 0;
 
 Context::Context(int pin) : m_pin(pin) {
     if (pin >= numPins) {
-        throw std::invalid_argument(fmt::format("wiring::Context::Context(): Pin number ({}) exceeds number of pins ({})", m_pin, numPins));
+        throw std::invalid_argument(std::format("wiring::Context::Context(): Pin number ({}) exceeds number of pins ({})", m_pin, numPins));
     }
 
     if (s_instances++ == 0) {
@@ -27,7 +26,7 @@ Context::Context(int pin) : m_pin(pin) {
 
     PinFlag flag = 1 << m_pin;
     if ((s_usedPins & flag) > 0) {
-        throw std::invalid_argument(fmt::format("wiring::Context::Context(): Pin is already in use: {}", m_pin));
+        throw std::invalid_argument(std::format("wiring::Context::Context(): Pin is already in use: {}", m_pin));
     }
     s_usedPins |= flag;
 }

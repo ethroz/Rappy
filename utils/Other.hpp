@@ -2,8 +2,11 @@
 
 #include <algorithm>
 #include <bit>
+#include <charconv>
 #include <concepts>
+#include <format>
 #include <limits>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -19,6 +22,37 @@ inline std::string toupper(std::string_view sv) {
     std::string s(sv);
     std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::toupper(c); });
     return s;
+}
+
+inline std::string plural(size_t n) {
+    return n == 1 ? "" : "s";
+}
+
+template <std::integral T>
+T to(std::string_view input) {
+    T out;
+    const auto [ptr, ec] = std::from_chars(input.data(), input.data() + input.size(), out, 10);
+    if(ec == std::errc::invalid_argument || ec == std::errc::result_out_of_range) {
+        throw std::invalid_argument(std::format("String is not an integer: {}", input));
+    }
+    return out;
+}
+
+template <std::floating_point T>
+T to(std::string_view input) {
+    static_assert(std::is_same_v<T, double> || std::is_same_v<T, float>);
+    if constexpr (std::is_same_v<T, double>) {
+        return std::stod(std::string(input));
+    }
+    else {
+        return std::stof(std::string(input));
+    }
+    // T out;
+    // const auto [ptr, ec] = std::from_chars(input.data(), input.data() + input.size(), out, std::chars_format::general);
+    // if(ec == std::errc::invalid_argument || ec == std::errc::result_out_of_range) {
+    //     return std::nullopt;
+    // }
+    // return out;
 }
 
 template <typename T>

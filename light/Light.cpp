@@ -1,7 +1,6 @@
+#include <format>
 #include <stdexcept>
 #include <vector>
-
-#include <fmt/format.h>
 
 #include "utils/JsonHelper.hpp"
 #include "utils/Other.hpp"
@@ -28,7 +27,7 @@ LightName nameFromString(std::string_view name) {
 
     const auto it = NAME_MAP.find(nameStr);
     if (it == NAME_MAP.end()) {
-        throw std::invalid_argument(fmt::format("Unrecognized LED name: {}", name));
+        throw std::invalid_argument(std::format("Unrecognized LED name: {}", name));
     }
 
     return it->second;
@@ -36,7 +35,7 @@ LightName nameFromString(std::string_view name) {
 
 Light::Light(LightName name, std::span<const int> pins, wiring::PinConfig config) : m_name(name) {
     if (pins.size() < 1 || pins.size() > 3) {
-        throw std::invalid_argument(fmt::format("Unsupported number of pins: {}", pins.size()));
+        throw std::invalid_argument(std::format("Unsupported number of pins: {}", pins.size()));
     }
 
     m_pins.resize(pins.size());
@@ -53,14 +52,14 @@ void Light::color(const Color& col) {
     }
 }
 
-Light Light::create(const json::object& cfg) {
-    const auto name = nameFromString(getAsStringViewOrThrow(cfg, "name", "light::Light::create()"));
-    const auto modeStr = getAsStringViewOr(cfg, "pin-mode", "pwm");
+Light Light::create(const boost::json::object& cfg) {
+    const auto name = nameFromString(getAsOrThrow<std::string_view>(cfg, "name", "light::Light::create()"));
+    const auto modeStr = getAsOr<std::string_view>(cfg, "pin-mode", "pwm");
     const auto mode = wiring::modeFromString(modeStr);
     const auto pins = getAsVecOrThrow<int>(cfg, "pins", "light::Light::create()");
 
     if (std::find(SUPPORTED_MODES.begin(), SUPPORTED_MODES.end(), mode) == SUPPORTED_MODES.end()) {
-        throw std::invalid_argument(fmt::format("Unsupported pin mode: {}", modeStr));
+        throw std::invalid_argument(std::format("Unsupported pin mode: {}", modeStr));
     }
     
     wiring::PinConfig config{};
@@ -83,7 +82,7 @@ Light Light::create(const json::object& cfg) {
         }
         return Light(name, pins, config);
     default:
-        throw std::invalid_argument(fmt::format("Unrecognized LED name: {}", to_underlying(name)));
+        throw std::invalid_argument(std::format("Unrecognized LED name: {}", to_underlying(name)));
     }
 }
 

@@ -14,6 +14,8 @@ namespace program {
 
 class Base {
 public:
+    virtual ~Base() = default;
+
     int run(int argc, char* argv[]) noexcept;
 
     void help() const noexcept;

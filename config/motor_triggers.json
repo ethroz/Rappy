@@ -1,0 +1,23 @@
+{
+    "inputs": {
+        "controller": {
+            "type": "controller",
+            "id": "js0"
+        }
+    },
+    "outputs": {
+        "motor": {
+            "type": "motor",
+            "name": "micro",
+            "pin": 15
+        }
+    },
+    "connections": [
+        {
+            "lt": "controller.lt",
+            "rt": "controller.rt",
+            "function": "rt - lt",
+            "output": "motor.value"
+        }
+    ]
+}

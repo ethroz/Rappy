@@ -1,9 +1,9 @@
 #include <cerrno>
+#include <format>
 #include <system_error>
 #include <poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <fmt/format.h>
 
 #include "Other.hpp"
 
@@ -24,7 +24,7 @@ bool checkFor(int fd, IoType type, int timeout = 0) {
     case IoType::IN:    fdData.events = POLLIN;            break;
     case IoType::OUT:   fdData.events = POLLOUT;           break;
     case IoType::CLOSE: fdData.events = POLLERR | POLLHUP; break;
-    default: throw std::invalid_argument(fmt::format("Unknown IO type: {}", to_underlying(type)));
+    default: throw std::invalid_argument(std::format("Unknown IO type: {}", to_underlying(type)));
     }
 
     while (poll(&fdData, 1, timeout) < 0) {

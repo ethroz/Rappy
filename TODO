@@ -1,6 +1,6 @@
 Make a universal program to connect any components with any components.
-Add motors as an output
 Add accelerometer as an input
+Make template inlined
 
 Make gyrometer have a save file that can be used for saving calibrations
 Make a self test for the gyrometer

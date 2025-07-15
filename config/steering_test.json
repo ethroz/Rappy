@@ -1,0 +1,32 @@
+{
+    "inputs": {
+        "controller": {
+            "type": "controller",
+            "id": "js0"
+        }
+    },
+    "outputs": {
+        "motor": {
+            "type": "motor",
+            "name": "fast",
+            "pins": [20, 21]
+        },
+        "steer": {
+            "type": "motor",
+            "name": "micro",
+            "pin": 22
+        }
+    },
+    "connections": [
+        {
+            "input": "controller.ljoy.x",
+            "output": "steer.value"
+        },
+        {
+            "lt": "controller.lt",
+            "rt": "controller.rt",
+            "function": "rt - lt",
+            "output": "motor.value"
+        }
+    ]
+}

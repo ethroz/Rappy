@@ -1,0 +1,21 @@
+{
+    "inputs": {
+        "controller": {
+            "type": "controller",
+            "id": "js0"
+        }
+    },
+    "outputs": {
+        "motor": {
+            "type": "motor",
+            "name": "micro",
+            "pin": 15
+        }
+    },
+    "connections": [
+        {
+            "input": "controller.ljoy.x",
+            "output": "motor.value"
+        }
+    ]
+}

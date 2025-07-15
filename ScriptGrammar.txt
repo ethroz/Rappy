@@ -1,0 +1,18 @@
+function -> '(' <arg> <arg_list> ')' '{' <expression> '}'
+arg_list -> ',' <arg> <arg_list>
+arg_list -> 
+arg -> [a-zA-Z][_a-zA-Z0-9]*
+expression -> '(' <expression> ')'
+expression -> <expression> <op> <expression>
+expression -> <arg>
+expression -> <number>
+op -> '^'
+op -> '*'
+op -> '/'
+op -> '-'
+op -> '+'
+number -> [+-]?(\d+([.]\d*)?([eE][+-]?\d+)?|[.]\d+([eE][+-]?\d+)?)
+
+predictor tokens:
+arg: [a-zA-Z]
+number: [+-.0-9]

@@ -1,6 +1,6 @@
+#include <format>
 #include <endian.h>
 #include <pigpio.h>
-#include <fmt/format.h>
 
 #include "utils/Other.hpp"
 #include "utils/PigpioError.hpp"
